@@ -31,7 +31,7 @@ namespace RazorEnhanced
     {
         public void Run()
         {
-            
+            Gumps.ResetGump();
             string gumpIDList = string.Join(",", Gumps.AllGumpIDs());
             if (gumpIDList.Contains("3644314075"))
             {
@@ -66,14 +66,14 @@ namespace RazorEnhanced
 
             // Remove all the unnecessary text from the string.
             string regexPattern = @"<[^>]+>|%|";
-            string outputString = Regex.Replace(gumpTextProcess, regexPattern, "").Replace("---", "0/0").Replace("-", "/").Replace(" => ", "/");
+            string outputString = Regex.Replace(gumpTextProcess, regexPattern, "").Replace("---", "0").Replace("-", "/").Replace(" => ", "/");
 
             // Populate the dictionary values with the data from the gump.
             var parseDict = Parse(outputString, trainedPet);
 
             // Define all values / properties for the pet.
             Pet myPet = new Pet(parseDict, rarityColours, petDefinitions, hexBreed);
-            
+
             // Show the GUI.
             CreateMenuInstance(myPet, parseDict, petDefinitions);
         }
@@ -128,60 +128,61 @@ namespace RazorEnhanced
 
         public static Dictionary<string, string[]> petDefinitions = new Dictionary<string, string[]>()
         {
-            { "0x000B", new string[] { "Dread Spider, FALSE,115-147,,146-150,,236-324,,231-279,,146-165,,285-321,,45-55,35-45,35-45,100-100,35-45"}},
-            { "0x000C", new string[] { "Dragon? 0C, FALSE,478-495,,86-105,,436-475,,796-825,,86-105,,436-475,,55-65,60-70,30-40,25-35,35-45"}},
-            { "0x0013", new string[] { "Dread Spider? 13, FALSE,115-147,,146-150,,236-324,,231-279,,146-165,,285-321,,45-55,35-45,35-45,100-100,35-45"}},
-            { "0x0014", new string[] { "Frost Spider? 14, FALSE,46-60,,126-144,,0-0,,76-100,,126-144,,36-60,,25-30,5-10,40-50,20-30,10-20"}},
-            { "0x0017", new string[] { "Dire Wolf, FALSE,46-72,,81-105,,36-60,,96-120,,81-105,,36-60,,20-25,10-20,5-10,5-10,10-15"}},
-            { "0x0031", new string[] { "White Wyrm, FALSE,433-456,,101-130,,386-425,,359-760,,101-130,,386-425,,55-70,15-25,80-90,40-50,40-50"}},
-            { "0x003B", new string[] { "Dragon, FALSE,478-495,,86-105,,436-475,,796-825,,86-105,,436-475,,55-65,60-70,30-40,25-35,35-45"}},
-            { "Unknown1", new string[] { "Toothless, ,,,,,,,,,,,,,,,,,"}},
-            { "0x003C", new string[] { "Drake, FALSE,241-258,,133-150,,101-140,,401-430,,133-152,,101-140,,45-50,50-60,40-50,20-30,30-40"}},
-            { "0x003D", new string[] { "Drake, FALSE,241-258,,133-150,,101-140,,401-430,,133-152,,101-140,,45-50,50-60,40-50,20-30,30-40"}},
-            { "0x0061", new string[] { "Hell Hound, FALSE,102-210,,81-105,,36-60,,102-150,,81-105,,36-60,,25-35,30-40,0-0,10-20,10-20"}},
-            { "0x0062", new string[] { "Hell Hound, FALSE,102-210,,81-105,,36-60,,102-150,,81-105,,36-60,,25-35,30-40,0-0,10-20,10-20"}},
-            { "0x0067", new string[] { "Serpentine Dragon, FALSE,480-480,,150-150,,1001-1040,,111-140,,201-220,,1001-1040,,35-40,25-35,25-35,25-35,25-35"}},
-            { "0x0069", new string[] { "Ancient Wyrm? 69, TRUE,500-1000,1000-2000,40-74,80-148,475-675,475-675,512-700,1025-1400,40-74,80-148,475-675,475-675,60-85,65-90,40-55,40-60,50-75"}},
-            { "0x006A", new string[] { "Shadow Wyrm, FALSE,898-1030,,44-100,,488-620,,898-1030,,44-100,,488-620,,65-75,50-60,45-55,20-30,50-60"}},
-            { "0x0074", new string[] { "Nightmare?, FALSE,298-315,,86-106,,86-125,,250-525,,86-106,,86-125,,55-65,30-40,30-40,30-40,20-30"}},
-            { "0x007A", new string[] { "Unicorn, FALSE,191-210,,96-115,,186-225,,296-325,,96-115,,186-225,,55-65,25-40,25-40,55-65,25-40"}},
-            { "0x0084", new string[] { "Ki-Rin, FALSE,191-210,,96-115,,186-225,,296-325,,96-115,,186-225,,55-65,35-45,25-35,25-35,25-35"}},
-            { "0x00A9", new string[] { "Fire Beetle, TRUE,100-100,200-200,50-50,100-100,500-500,500-500,150-150,300-300,50-50,100-100,500-500,500-500,40-40,70-75,10-10,30-30,30-30"}},
-            { "0x00B1", new string[] { "Nightmare, FALSE,298-315,,86-106,,86-125,,250-525,,86-106,,86-125,,55-65,30-40,30-40,30-40,20-30"}},
-            { "0x00B2", new string[] { "Nightmare, FALSE,298-315,,86-106,,86-125,,250-525,,86-106,,86-125,,55-65,30-40,30-40,30-40,20-30"}},
-            { "0x00B3", new string[] { "Nightmare, FALSE,298-315,,86-106,,86-125,,250-525,,86-106,,86-125,,55-65,30-40,30-40,30-40,20-30"}},
-            { "Unknown2", new string[] { "Nightmare, FALSE,298-315,,86-106,,86-125,,250-525,,86-106,,86-125,,55-65,30-40,30-40,30-40,20-30"}},
-            { "0x00B4", new string[] { "White Wyrm? B4, FALSE,433-456,,101-130,,386-425,,359-760,,101-130,,386-425,,55-70,15-25,80-90,40-50,40-50"}},
-            { "0x00BE", new string[] { "Fire Steed, FALSE,226-240,,91-120,,291-300,,376-400,,91-120,,291-300,,30-40,70-80,20-30,30-40,30-40"}},
-            { "0x00D5", new string[] { "Polar Bear, FALSE,116-140,,81-105,,26-50,,116-140,,81-105,,26-50,,25-35,0-0,60-80,15-25,10-15"}},
-            { "0x00F4", new string[] { "Rune Beetle, FALSE,305-360,,121-150,,375-450,,400-465,,121-170,,375-450,,40-65,35-50,35-50,75-95,40-60"}},
-            { "0x00F6", new string[] { "Bake Kitsune, FALSE,301-350,,125-145,,375-425,,170-220,,125-145,,375-425,,40-60,70-90,40-60,40-60,40-60"}},
-            { "0x0114", new string[] { "Reptalon, TRUE,406-463,812-926,75-85,150-170,250-290,250-290,500-512,1000-1025,75-85,150-170,250-290,250-290,50-65,35-45,35-45,50-65,70-85"}},
-            { "0x0115", new string[] { "Cu Sidhe, TRUE,500-600,1000-1200,75-85,150-170,250-290,250-290,600-612,1200-1225,75-85,150-170,250-290,250-290,50-65,25-45,70-85,30-50,70-85"}},
-            { "0x0123", new string[] { "Pack Horse, FALSE,61-80,,81-100,,0-0,,44-120,,36-55,,6-10,,20-25,10-15,20-25,10-15,10-15"}},
-            { "0x0124", new string[] { "Pack Llama, FALSE,50-50,,86-105,,0-0,,52-80,,36-55,,16-30,,25-35,10-15,10-15,10-15,10-15"}},
-            { "0x02CB", new string[] { "High Plains Boura, FALSE,574-675,,85-103,,25-30,,370-532,,85-103,,25-30,,55-65,30-40,50-60,40-50,30-40"}},
-            { "0x02CF", new string[] { "Dragon Wolf, FALSE,776-852,,67-77,,54-77,,785-915,,67-77,,54-77,,45-55,30-40,30-40,40-50,40-50"}},
-            { "0x02E1", new string[] { "a spider, FALSE,737-854,,150-150,,21-40,,162-346,,151-218,,21-40,,45-55,50-60,45-55,100-100,35-45"}},
-            { "0x0317", new string[] { "Giant Beetle, TRUE,100-100,200-200,50-50,100-100,500-500,500-500,150-150,300-300,50-50,100-100,500-500,500-500,30-40,20-30,20-30,20-30,20-30"}},
-            { "0x0340", new string[] { "Phoenix, FALSE,340-380,,150-150,,532-672,,551-650,,220-300,,532-672,,45-55,60-70,0-0,25-35,40-50"}},
-            { "0x0505", new string[] { "Dimetrosaur, TRUE,686-750,5488-6000,82-92,165-185,361-435,361-435,261-307,522-615,82-92,165-185,361-435,361-435,80-90,60-70,60-70,65-75,65-75"}},
-            { "0x0506", new string[] { "Gallusaurus, FALSE,751-790,,150-150,,144-288,,473-514,,151-170,,144-288,,50-60,20-30,20-30,60-70,20-30"}},
-            { "0x0509", new string[] { "Najasaurus, FALSE,737-854,,150-150,,21-40,,162-346,,151-218,,21-40,,45-55,50-60,45-55,100-100,35-45"}},
-            { "0x057F", new string[] { "Charlie, ,,,,,,,,,,,,,,,,,"}},
-            { "0x0582", new string[] { "Windrunner, FALSE,240-240,,125-125,,0-0,,400-400,,125-125,,51-55,,40-50,30-40,30-40,30-40,30-40"}},
-            { "0x0587", new string[] { "Triceratops, TRUE,503-600,1006-1200,75-85,150-170,277-319,277-319,551-658,1102-1316,75-85,150-170,277-319,277-319,60-85,30-45,30-55,35-50,35-55"}},
-            { "0x058C", new string[] { "Crimson Drake, FALSE,241-258,,130-150,,100-140,,400-430,,130-155,,100-140,,30-50,30-50,30-50,30-50,30-50"}},
-            { "0x0590", new string[] { "Frost Mite, TRUE,400-500,800-1000,75-85,150-170,250-290,250-290,500-513,1000-1026,75-85,150-170,250-290,250-290,50-65,15-25,85-95,50-65,40-55"}},
-            { "0x3E94", new string[] { "Hiryu, TRUE,450-550,900-1100,85-135,170-270,60-60,60-60,600-705,1200-1410,85-135,170-270,300-325,300-325,55-70,70-90,15-25,40-50,40-50"}},
-            { "0x3EA7", new string[] { "Dread Warhorse, FALSE,555-650,,89-125,,100-165,,501-555,,89-125,,100-165,,65-75,20-40,20-40,50-60,40-50"}},
-            { "Unknown3", new string[] { "Nightmare, FALSE,298-315,,86-106,,86-125,,250-525,,86-106,,86-125,,55-65,30-40,30-40,30-40,20-30"}},
-            { "0x3EBD", new string[] { "Bane Dragon, FALSE,551-650,,88-125,,88-165,,495-555,,88-125,,88-165,,60-70,40-50,35-45,50-60,20-40"}},
-            { "0xA2D8", new string[] { "Triton, FALSE,651-700,,150-150,,101-120,,101-250,,151-220,,101-120,,45-55,50-60,45-55,35-45,85-90"}},
-            { "Unknown4", new string[] { "Drake, FALSE,241-258,,133-150,,101-140,,401-430,,133-152,,101-140,,45-50,50-60,40-50,20-30,30-40"}},
-            { "Unknown5", new string[] { "Frost Dragon, TRUE,750-1000,1500-2000,44-71,88-142,490-688,490-688,515-642,1030-1285,44-71,88-142,495-688,495-688,70-90,55-60,80-90,65-70,55-75"}},
-            { "Unknown6", new string[] { "Frost Drake, FALSE,240-260,,150-150,,301-360,,400-430,,160-182,,301-360,,45-50,40-50,50-60,20-30,30-40"}},
             { "Unknown7", new string[] { "Greater Dragon, TRUE,500-1000,1000-2000,40-74,80-148,475-675,475-675,512-700,1025-1400,40-74,80-148,475-675,475-675,60-85,65-90,40-55,40-60,50-75"}},
+            { "Unknown6", new string[] { "Frost Drake, FALSE,240-260,,150-150,,301-360,,400-430,,160-182,,301-360,,45-50,40-50,50-60,20-30,30-40"}},
+            { "Unknown5", new string[] { "Frost Dragon, TRUE,750-1000,1500-2000,44-71,88-142,490-688,490-688,515-642,1030-1285,44-71,88-142,495-688,495-688,70-90,55-60,80-90,65-70,55-75"}},
+            { "Unknown4", new string[] { "Drake, FALSE,241-258,,133-150,,101-140,,401-430,,133-152,,101-140,,45-50,50-60,40-50,20-30,30-40"}},
+            { "Unknown3", new string[] { "Nightmare, FALSE,298-315,,86-106,,86-125,,250-525,,86-106,,86-125,,55-65,30-40,30-40,30-40,20-30"}},
+            { "Unknown2", new string[] { "Nightmare, FALSE,298-315,,86-106,,86-125,,250-525,,86-106,,86-125,,55-65,30-40,30-40,30-40,20-30"}},
+            { "Unknown1", new string[] { "Toothless, ,,,,,,,,,,,,,,,,,"}},
+            { "0xA2D8", new string[] { "Triton, FALSE,651-700,,150-150,,101-120,,101-250,,151-220,,101-120,,45-55,50-60,45-55,35-45,85-90"}},
+            { "0x3EBD", new string[] { "Bane Dragon, FALSE,551-650,,88-125,,88-165,,495-555,,88-125,,88-165,,60-70,40-50,35-45,50-60,20-40"}},
+            { "0x3EA7", new string[] { "Dread Warhorse, FALSE,555-650,,89-125,,100-165,,501-555,,89-125,,100-165,,65-75,20-40,20-40,50-60,40-50"}},
+            { "0x3E94", new string[] { "Hiryu, TRUE,450-550,900-1100,85-135,170-270,60-60,60-60,600-705,1200-1410,85-135,170-270,300-325,300-325,55-70,70-90,15-25,40-50,40-50"}},
+            { "0x0590", new string[] { "Frost Mite, TRUE,400-500,800-1000,75-85,150-170,250-290,250-290,500-513,1000-1026,75-85,150-170,250-290,250-290,50-65,15-25,85-95,50-65,40-55"}},
+            { "0x058C", new string[] { "Crimson Drake, FALSE,241-258,,130-150,,100-140,,400-430,,130-155,,100-140,,30-50,30-50,30-50,30-50,30-50"}},
+            { "0x0589", new string[] { "Platinum Drake, FALSE,241-258,,130-150,,100-140,,400-430,,130-155,,100-140,,30-50,30-50,30-50,30-50,30-50"}},
+            { "0x0587", new string[] { "Triceratops, TRUE,503-600,1006-1200,75-85,150-170,277-319,277-319,551-658,1102-1316,75-85,150-170,277-319,277-319,60-85,30-45,30-55,35-50,35-55"}},
+            { "0x0582", new string[] { "Windrunner, FALSE,240-240,,125-125,,0-0,,400-400,,125-125,,51-55,,40-50,30-40,30-40,30-40,30-40"}},
+            { "0x057F", new string[] { "Charlie, ,,,,,,,,,,,,,,,,,"}},
+            { "0x0509", new string[] { "Najasaurus, FALSE,737-854,,150-150,,21-40,,162-346,,151-218,,21-40,,45-55,50-60,45-55,100-100,35-45"}},
+            { "0x0506", new string[] { "Gallusaurus, FALSE,751-790,,150-150,,144-288,,473-514,,151-170,,144-288,,50-60,20-30,20-30,60-70,20-30"}},
+            { "0x0505", new string[] { "Dimetrosaur, TRUE,686-750,5488-6000,82-92,165-185,361-435,361-435,261-307,522-615,82-92,165-185,361-435,361-435,80-90,60-70,60-70,65-75,65-75"}},
+            { "0x0340", new string[] { "Phoenix, FALSE,340-380,,150-150,,532-672,,551-650,,220-300,,532-672,,45-55,60-70,0-0,25-35,40-50"}},
+            { "0x0317", new string[] { "Giant Beetle, TRUE,100-100,200-200,50-50,100-100,500-500,500-500,150-150,300-300,50-50,100-100,500-500,500-500,30-40,20-30,20-30,20-30,20-30"}},
+            { "0x02E1", new string[] { "a spider, FALSE,737-854,,150-150,,21-40,,162-346,,151-218,,21-40,,45-55,50-60,45-55,100-100,35-45"}},
+            { "0x02CF", new string[] { "Dragon Wolf, FALSE,776-852,,67-77,,54-77,,785-915,,67-77,,54-77,,45-55,30-40,30-40,40-50,40-50"}},
+            { "0x02CB", new string[] { "High Plains Boura, FALSE,574-675,,85-103,,25-30,,370-532,,85-103,,25-30,,55-65,30-40,50-60,40-50,30-40"}},
+            { "0x0124", new string[] { "Pack Llama, FALSE,50-50,,86-105,,0-0,,52-80,,36-55,,16-30,,25-35,10-15,10-15,10-15,10-15"}},
+            { "0x0123", new string[] { "Pack Horse, FALSE,61-80,,81-100,,0-0,,44-120,,36-55,,6-10,,20-25,10-15,20-25,10-15,10-15"}},
+            { "0x0115", new string[] { "Cu Sidhe, TRUE,500-600,1000-1200,75-85,150-170,250-290,250-290,600-612,1200-1225,75-85,150-170,250-290,250-290,50-65,25-45,70-85,30-50,70-85"}},
+            { "0x0114", new string[] { "Reptalon, TRUE,406-463,812-926,75-85,150-170,250-290,250-290,500-512,1000-1025,75-85,150-170,250-290,250-290,50-65,35-45,35-45,50-65,70-85"}},
+            { "0x00F6", new string[] { "Bake Kitsune, FALSE,301-350,,125-145,,375-425,,170-220,,125-145,,375-425,,40-60,70-90,40-60,40-60,40-60"}},
+            { "0x00F4", new string[] { "Rune Beetle, FALSE,305-360,,121-150,,375-450,,400-465,,121-170,,375-450,,40-65,35-50,35-50,75-95,40-60"}},
+            { "0x00D5", new string[] { "Polar Bear, FALSE,70-84,,80-105,,30-40,,116-140,,81-105,,26-50,,25-35,0-0,60-80,15-25,10-15"}},
+            { "0x00BE", new string[] { "Fire Steed, FALSE,226-240,,91-120,,291-300,,376-400,,91-120,,291-300,,30-40,70-80,20-30,30-40,30-40"}},
+            { "0x00B4", new string[] { "White Wyrm, FALSE,433-456,,101-130,,386-425,,359-760,,101-130,,386-425,,55-70,15-25,80-90,40-50,40-50"}},
+            { "0x00B3", new string[] { "Nightmare, FALSE,298-315,,86-106,,86-125,,250-525,,86-106,,86-125,,55-65,30-40,30-40,30-40,20-30"}},
+            { "0x00B2", new string[] { "Nightmare, FALSE,298-315,,86-106,,86-125,,250-525,,86-106,,86-125,,55-65,30-40,30-40,30-40,20-30"}},
+            { "0x00B1", new string[] { "Nightmare, FALSE,298-315,,86-106,,86-125,,250-525,,86-106,,86-125,,55-65,30-40,30-40,30-40,20-30"}},
+            { "0x00A9", new string[] { "Fire Beetle, TRUE,100-100,200-200,50-50,100-100,500-500,500-500,150-150,300-300,50-50,100-100,500-500,500-500,40-40,70-75,10-10,30-30,30-30"}},
+            { "0x0084", new string[] { "Ki-Rin, FALSE,191-210,,96-115,,186-225,,296-325,,96-115,,186-225,,55-65,35-45,25-35,25-35,25-35"}},
+            { "0x007A", new string[] { "Unicorn, FALSE,191-210,,96-115,,186-225,,296-325,,96-115,,186-225,,55-65,25-40,25-40,55-65,25-40"}},
+            { "0x0074", new string[] { "Nightmare?, FALSE,298-315,,86-106,,86-125,,250-525,,86-106,,86-125,,55-65,30-40,30-40,30-40,20-30"}},
+            { "0x006A", new string[] { "Shadow Wyrm, FALSE,561-600,,44-100,,488-620,,898-1030,,44-100,,488-620,,65-75,50-60,45-55,20-30,50-60"}},
+            { "0x0069", new string[] { "Ancient Wyrm? 69, TRUE,500-1000,1000-2000,40-74,80-148,475-675,475-675,512-700,1025-1400,40-74,80-148,475-675,475-675,60-85,65-90,40-55,40-60,50-75"}},
+            { "0x0067", new string[] { "Serpentine Dragon, FALSE,480-480,,150-150,,1001-1040,,111-140,,201-220,,1001-1040,,35-40,25-35,25-35,25-35,25-35"}},
+            { "0x0062", new string[] { "Hell Hound, FALSE,102-210,,81-105,,36-60,,102-150,,81-105,,36-60,,25-35,30-40,0-0,10-20,10-20"}},
+            { "0x0061", new string[] { "Hell Hound, FALSE,102-210,,81-105,,36-60,,102-150,,81-105,,36-60,,25-35,30-40,0-0,10-20,10-20"}},
+            { "0x003D", new string[] { "Drake, FALSE,241-258,,133-150,,101-140,,401-430,,133-152,,101-140,,45-50,50-60,40-50,20-30,30-40"}},
+            { "0x003C", new string[] { "Drake, FALSE,241-258,,133-150,,101-140,,401-430,,133-152,,101-140,,45-50,50-60,40-50,20-30,30-40"}},
+            { "0x003B", new string[] { "Dragon, FALSE,478-495,,86-105,,436-475,,796-825,,86-105,,436-475,,55-65,60-70,30-40,25-35,35-45"}},
+            { "0x0031", new string[] { "White Wyrm ? 31, FALSE,433-456,,101-130,,386-425,,359-760,,101-130,,386-425,,55-70,15-25,80-90,40-50,40-50"}},
+            { "0x0017", new string[] { "Dire Wolf, FALSE,46-72,,81-105,,36-60,,96-120,,81-105,,36-60,,20-25,10-20,5-10,5-10,10-15"}},
+            { "0x0014", new string[] { "Frost Spider? 14, FALSE,46-60,,126-144,,0-0,,76-100,,126-144,,36-60,,25-30,5-10,40-50,20-30,10-20"}},
+            { "0x0013", new string[] { "Dread Spider? 13, FALSE,115-147,,146-150,,236-324,,231-279,,146-165,,285-321,,45-55,35-45,35-45,100-100,35-45"}},
+            { "0x000C", new string[] { "Dragon? 0C, FALSE,478-495,,86-105,,436-475,,796-825,,86-105,,436-475,,55-65,60-70,30-40,25-35,35-45"}},
+            { "0x000B", new string[] { "Dread Spider, FALSE,115-147,,146-150,,236-324,,231-279,,146-165,,285-321,,45-55,35-45,35-45,100-100,35-45"}},
         };
 
         public void CreateMenuInstance(Pet myPet, Dictionary<string, string> parseDict, Dictionary<string, string[]> petDict)
@@ -677,43 +678,40 @@ namespace RazorEnhanced
                 ResistEnergy = resistEnergy;
 
             if (parseDict.TryGetValue("damagephysical", out string damagePhysical))
-                DamagePhysical = damagePhysical.Equals("0/0") ? "---" : int.TryParse(damagePhysical, out int physicalDamage) ? physicalDamage.ToString() : damagePhysical.Split('/')[1];
+                DamagePhysical = damagePhysical.Equals("0") ? "---" : int.TryParse(damagePhysical, out int physicalDamage) ? physicalDamage.ToString() : damagePhysical.Split('/')[1];
 
             if (parseDict.TryGetValue("damagefire", out string damageFire))
-                DamageFire = damageFire.Equals("0/0") ? "---" : int.TryParse(damageFire, out int fireDamage) ? fireDamage.ToString() : damageFire.Split('/')[1];
+                DamageFire = damageFire.Equals("0") ? "---" : int.TryParse(damageFire, out int fireDamage) ? fireDamage.ToString() : damageFire.Split('/')[1];
 
             if (parseDict.TryGetValue("damagecold", out string damageCold))
-                DamageCold = damageCold.Equals("0/0") ? "---" : int.TryParse(damageCold, out int coldDamage) ? coldDamage.ToString() : damageCold.Split('/')[1];
+                DamageCold = damageCold.Equals("0") ? "---" : int.TryParse(damageCold, out int coldDamage) ? coldDamage.ToString() : damageCold.Split('/')[1];
 
             if (parseDict.TryGetValue("damagepoison", out string damagePoison))
-                DamagePoison = damagePoison.Equals("0/0") ? "---" : int.TryParse(damagePoison, out int poisonDamage) ? poisonDamage.ToString() : damagePoison.Split('/')[1];
+                DamagePoison = damagePoison.Equals("0") ? "---" : int.TryParse(damagePoison, out int poisonDamage) ? poisonDamage.ToString() : damagePoison.Split('/')[1];
             
             if (parseDict.TryGetValue("damageenergy", out string damageEnergy))
-                DamageEnergy = damageEnergy.Equals("0/0") ? "---" : int.TryParse(damageEnergy, out int energyDamage) ? energyDamage.ToString() : damageEnergy.Split('/')[1];
+                DamageEnergy = damageEnergy.Equals("0") ? "---" : int.TryParse(damageEnergy, out int energyDamage) ? energyDamage.ToString() : damageEnergy.Split('/')[1];
 
             if (parseDict.TryGetValue("damage", out string damage))
-                Damage = damage.Equals("0/0") ? "---" : damage.Substring(0, damage.IndexOf('/')) + " - " + damage.Substring(damage.IndexOf("/") + 1);
+                Damage = damage.Equals("0") ? "---" : damage.Substring(0, damage.IndexOf('/')) + " - " + damage.Substring(damage.IndexOf("/") + 1);
 
             if (parseDict.TryGetValue("wrestling", out string wrestling))
             {
                 var wrestlingArray = wrestling.Split('/');
-                if (wrestlingArray.Length == 2)
+                if (wrestling == "0")
                 {
-                    if (wrestling == "0/0")
+                    WrestlingMin = "---";
+                    WrestlingMax = "---";
+                }
+                else
+                {
+                    if (double.TryParse(wrestlingArray[0], out double minWrestling))
                     {
-                        WrestlingMin = "---";
-                        WrestlingMax = "---";
+                        WrestlingMin = minWrestling.ToString("0.0");
                     }
-                    else
+                    if (int.TryParse(wrestlingArray[1], out int maxWrestling))
                     {
-                        if (double.TryParse(wrestlingArray[0], out double minWrestling))
-                        {
-                            WrestlingMin = minWrestling.ToString("0.0");
-                        }
-                        if (int.TryParse(wrestlingArray[1], out int maxWrestling))
-                        {
-                            WrestlingMax = maxWrestling.ToString();
-                        }
+                        WrestlingMax = maxWrestling.ToString();
                     }
                 }
             }
@@ -721,23 +719,20 @@ namespace RazorEnhanced
             if (parseDict.TryGetValue("tactics", out string tactics))
             {
                 var tacticsArray = tactics.Split('/');
-                if (tacticsArray.Length == 2)
+                if (tactics == "0")
                 {
-                    if (tactics == "0/0")
+                    TacticsMin = "---";
+                    TacticsMax = "---";
+                }
+                else
+                {
+                    if (double.TryParse(tacticsArray[0], out double minTactics))
                     {
-                        TacticsMin = "---";
-                        TacticsMax = "---";
+                        TacticsMin = minTactics.ToString("0.0");
                     }
-                    else
+                    if (int.TryParse(tacticsArray[1], out int maxTactics))
                     {
-                        if (double.TryParse(tacticsArray[0], out double minTactics))
-                        {
-                            TacticsMin = minTactics.ToString("0.0");
-                        }
-                        if (int.TryParse(tacticsArray[1], out int maxTactics))
-                        {
-                            TacticsMax = maxTactics.ToString();
-                        }
+                        TacticsMax = maxTactics.ToString();
                     }
                 }
             }
@@ -745,23 +740,20 @@ namespace RazorEnhanced
             if (parseDict.TryGetValue("resistingspells", out string resistingspells))
             {
                 var resistingspellsArray = resistingspells.Split('/');
-                if (resistingspellsArray.Length == 2)
+                if (resistingspells == "0")
                 {
-                    if (resistingspells == "0/0")
+                    ResistingSpellsMin = "---";
+                    ResistingSpellsMax = "---";
+                }
+                else
+                {
+                    if (double.TryParse(resistingspellsArray[0], out double minResistingSpells))
                     {
-                        ResistingSpellsMin = "---";
-                        ResistingSpellsMax = "---";
+                        ResistingSpellsMin = minResistingSpells.ToString("0.0");
                     }
-                    else
+                    if (int.TryParse(resistingspellsArray[1], out int maxResistingSpells))
                     {
-                        if (double.TryParse(resistingspellsArray[0], out double minResistingSpells))
-                        {
-                            ResistingSpellsMin = minResistingSpells.ToString("0.0");
-                        }
-                        if (int.TryParse(resistingspellsArray[1], out int maxResistingSpells))
-                        {
-                            ResistingSpellsMax = maxResistingSpells.ToString();
-                        }
+                        ResistingSpellsMax = maxResistingSpells.ToString();
                     }
                 }
             }
@@ -769,23 +761,20 @@ namespace RazorEnhanced
             if (parseDict.TryGetValue("anatomy", out string anatomy))
             {
                 var anatomyArray = anatomy.Split('/');
-                if (anatomyArray.Length == 2)
+                if (anatomy == "0")
                 {
-                    if (anatomy == "0/0")
+                    AnatomyMin = "---";
+                    AnatomyMax = "---";
+                }
+                else
+                {
+                    if (double.TryParse(anatomyArray[0], out double minAnatomy))
                     {
-                        AnatomyMin = "---";
-                        AnatomyMax = "---";
+                        AnatomyMin = minAnatomy.ToString("0.0");
                     }
-                    else
+                    if (int.TryParse(anatomyArray[1], out int maxAnatomy))
                     {
-                        if (double.TryParse(anatomyArray[0], out double minAnatomy))
-                        {
-                            AnatomyMin = minAnatomy.ToString("0.0");
-                        }
-                        if (int.TryParse(anatomyArray[1], out int maxAnatomy))
-                        {
-                            AnatomyMax = maxAnatomy.ToString();
-                        }
+                        AnatomyMax = maxAnatomy.ToString();
                     }
                 }
             }
@@ -793,23 +782,20 @@ namespace RazorEnhanced
             if (parseDict.TryGetValue("healing", out string healing))
             {
                 var healingArray = healing.Split('/');
-                if (healingArray.Length == 2)
+                if (healing == "0")
                 {
-                    if (healing == "0/0")
+                    HealingMin = "---";
+                    HealingMax = "---";
+                }
+                else
+                {
+                    if (double.TryParse(healingArray[0], out double minHealing))
                     {
-                        HealingMin = "---";
-                        HealingMax = "---";
+                        HealingMin = minHealing.ToString("0.0");
                     }
-                    else
+                    if (int.TryParse(healingArray[1], out int maxHealing))
                     {
-                        if (double.TryParse(healingArray[0], out double minHealing))
-                        {
-                            HealingMin = minHealing.ToString("0.0");
-                        }
-                        if (int.TryParse(healingArray[1], out int maxHealing))
-                        {
-                            HealingMax = maxHealing.ToString();
-                        }
+                        HealingMax = maxHealing.ToString();
                     }
                 }
             }
@@ -817,23 +803,20 @@ namespace RazorEnhanced
             if (parseDict.TryGetValue("poisoning", out string poisoning))
             {
                 var poisoningArray = poisoning.Split('/');
-                if (poisoningArray.Length == 2)
+                if (poisoning == "0")
                 {
-                    if (poisoning == "0/0")
+                    PoisoningMin = "---";
+                    PoisoningMax = "---";
+                }
+                else
+                {
+                    if (double.TryParse(poisoningArray[0], out double minPoisoning))
                     {
-                        PoisoningMin = "---";
-                        PoisoningMax = "---";
+                        PoisoningMin = minPoisoning.ToString("0.0");
                     }
-                    else
+                    if (int.TryParse(poisoningArray[1], out int maxPoisoning))
                     {
-                        if (double.TryParse(poisoningArray[0], out double minPoisoning))
-                        {
-                            PoisoningMin = minPoisoning.ToString("0.0");
-                        }
-                        if (int.TryParse(poisoningArray[1], out int maxPoisoning))
-                        {
-                            PoisoningMax = maxPoisoning.ToString();
-                        }
+                        PoisoningMax = maxPoisoning.ToString();
                     }
                 }
             }
@@ -841,23 +824,20 @@ namespace RazorEnhanced
             if (parseDict.TryGetValue("detectinghidden", out string detectinghidden))
             {
                 var detectinghiddenArray = detectinghidden.Split('/');
-                if (detectinghiddenArray.Length == 2)
+                if (detectinghidden == "0")
                 {
-                    if (detectinghidden == "0/0")
+                    DetectingHiddenMin = "---";
+                    DetectingHiddenMax = "---";
+                }
+                else
+                {
+                    if (double.TryParse(detectinghiddenArray[0], out double minDetectingHidden))
                     {
-                        DetectingHiddenMin = "---";
-                        DetectingHiddenMax = "---";
+                        DetectingHiddenMin = minDetectingHidden.ToString("0.0");
                     }
-                    else
+                    if (int.TryParse(detectinghiddenArray[1], out int maxDetectingHidden))
                     {
-                        if (double.TryParse(detectinghiddenArray[0], out double minDetectingHidden))
-                        {
-                            DetectingHiddenMin = minDetectingHidden.ToString("0.0");
-                        }
-                        if (int.TryParse(detectinghiddenArray[1], out int maxDetectingHidden))
-                        {
-                            DetectingHiddenMax = maxDetectingHidden.ToString();
-                        }
+                        DetectingHiddenMax = maxDetectingHidden.ToString();
                     }
                 }
             }
@@ -865,23 +845,20 @@ namespace RazorEnhanced
             if (parseDict.TryGetValue("hiding", out string hiding))
             {
                 var hidingArray = hiding.Split('/');
-                if (hidingArray.Length == 2)
+                if (hiding == "0")
                 {
-                    if (hiding == "0/0")
+                    HidingMin = "---";
+                    HidingMax = "---";
+                }
+                else
+                {
+                    if (double.TryParse(hidingArray[0], out double minHiding))
                     {
-                        HidingMin = "---";
-                        HidingMax = "---";
+                        HidingMin = minHiding.ToString("0.0");
                     }
-                    else
+                    if (int.TryParse(hidingArray[1], out int maxHiding))
                     {
-                        if (double.TryParse(hidingArray[0], out double minHiding))
-                        {
-                            HidingMin = minHiding.ToString("0.0");
-                        }
-                        if (int.TryParse(hidingArray[1], out int maxHiding))
-                        {
-                            HidingMax = maxHiding.ToString();
-                        }
+                        HidingMax = maxHiding.ToString();
                     }
                 }
             }
@@ -889,23 +866,20 @@ namespace RazorEnhanced
             if (parseDict.TryGetValue("parrying", out string parrying))
             {
                 var parryingArray = parrying.Split('/');
-                if (parryingArray.Length == 2)
+                if (parrying == "0")
                 {
-                    if (parrying == "0/0")
+                    ParryingMin = "---";
+                    ParryingMax = "---";
+                }
+                else
+                {
+                    if (double.TryParse(parryingArray[0], out double minParrying))
                     {
-                        ParryingMin = "---";
-                        ParryingMax = "---";
+                        ParryingMin = minParrying.ToString("0.0");
                     }
-                    else
+                    if (int.TryParse(parryingArray[1], out int maxParrying))
                     {
-                        if (double.TryParse(parryingArray[0], out double minParrying))
-                        {
-                            ParryingMin = minParrying.ToString("0.0");
-                        }
-                        if (int.TryParse(parryingArray[1], out int maxParrying))
-                        {
-                            ParryingMax = maxParrying.ToString();
-                        }
+                        ParryingMax = maxParrying.ToString();
                     }
                 }
             }
@@ -913,71 +887,64 @@ namespace RazorEnhanced
             if (parseDict.TryGetValue("magery", out string magery))
             {
                 var mageryArray = magery.Split('/');
-                if (mageryArray.Length == 2)
+                if (magery == "0")
                 {
-                    if (magery == "0/0")
+                    MageryMin = "---";
+                    MageryMax = "---";
+                }
+                else
+                {
+                    if (double.TryParse(mageryArray[0], out double minMagery))
                     {
-                        MageryMin = "---";
-                        MageryMax = "---";
+                        MageryMin = minMagery.ToString("0.0");
                     }
-                    else
+                    if (int.TryParse(mageryArray[1], out int maxMagery))
                     {
-                        if (double.TryParse(mageryArray[0], out double minMagery))
-                        {
-                            MageryMin = minMagery.ToString("0.0");
-                        }
-                        if (int.TryParse(mageryArray[1], out int maxMagery))
-                        {
-                            MageryMax = maxMagery.ToString();
-                        }
+                        MageryMax = maxMagery.ToString();
                     }
                 }
+
             }
 
             if (parseDict.TryGetValue("evalintelligence", out string evalintelligence))
             {
                 var evalintelligenceArray = evalintelligence.Split('/');
-                if (evalintelligenceArray.Length == 2)
+                if (evalintelligence == "0")
                 {
-                    if (evalintelligence == "0/0")
+                    EvalIntelligenceMin = "---";
+                    EvalIntelligenceMax = "---";
+                }
+                else
+                {
+                    if (double.TryParse(evalintelligenceArray[0], out double minEvalIntelligence))
                     {
-                        EvalIntelligenceMin = "---";
-                        EvalIntelligenceMax = "---";
+                        EvalIntelligenceMin = minEvalIntelligence.ToString("0.0");
                     }
-                    else
+                    if (int.TryParse(evalintelligenceArray[1], out int maxEvalIntelligence))
                     {
-                        if (double.TryParse(evalintelligenceArray[0], out double minEvalIntelligence))
-                        {
-                            EvalIntelligenceMin = minEvalIntelligence.ToString("0.0");
-                        }
-                        if (int.TryParse(evalintelligenceArray[1], out int maxEvalIntelligence))
-                        {
-                            EvalIntelligenceMax = maxEvalIntelligence.ToString();
-                        }
+                        EvalIntelligenceMax = maxEvalIntelligence.ToString();
                     }
                 }
+
             }
 
             if (parseDict.TryGetValue("meditation", out string meditation))
             {
                 var meditationArray = meditation.Split('/');
-                if (meditationArray.Length == 2)
+                if (meditation == "0")
                 {
-                    if (meditation == "0/0")
+                    MeditationMin = "---";
+                    MeditationMax = "---";
+                }
+                else
+                {
+                    if (double.TryParse(meditationArray[0], out double minMeditation))
                     {
-                        MeditationMin = "---";
-                        MeditationMax = "---";
+                        MeditationMin = minMeditation.ToString("0.0");
                     }
-                    else
+                    if (int.TryParse(meditationArray[1], out int maxMeditation))
                     {
-                        if (double.TryParse(meditationArray[0], out double minMeditation))
-                        {
-                            MeditationMin = minMeditation.ToString("0.0");
-                        }
-                        if (int.TryParse(meditationArray[1], out int maxMeditation))
-                        {
-                            MeditationMax = maxMeditation.ToString();
-                        }
+                        MeditationMax = maxMeditation.ToString();
                     }
                 }
             }
@@ -985,23 +952,20 @@ namespace RazorEnhanced
             if (parseDict.TryGetValue("necromancy", out string necromancy))
             {
                 var necromancyArray = necromancy.Split('/');
-                if (necromancyArray.Length == 2)
+                if (necromancy == "0")
                 {
-                    if (necromancy == "0/0")
+                    NecromancyMin = "---";
+                    NecromancyMax = "---";
+                }
+                else
+                {
+                    if (double.TryParse(necromancyArray[0], out double minNecromancy))
                     {
-                        NecromancyMin = "---";
-                        NecromancyMax = "---";
+                        NecromancyMin = minNecromancy.ToString("0.0");
                     }
-                    else
+                    if (int.TryParse(necromancyArray[1], out int maxNecromancy))
                     {
-                        if (double.TryParse(necromancyArray[0], out double minNecromancy))
-                        {
-                            NecromancyMin = minNecromancy.ToString("0.0");
-                        }
-                        if (int.TryParse(necromancyArray[1], out int maxNecromancy))
-                        {
-                            NecromancyMax = maxNecromancy.ToString();
-                        }
+                        NecromancyMax = maxNecromancy.ToString();
                     }
                 }
             }
@@ -1009,23 +973,20 @@ namespace RazorEnhanced
             if (parseDict.TryGetValue("spiritspeak", out string spiritspeak))
             {
                 var spiritspeakArray = spiritspeak.Split('/');
-                if (spiritspeakArray.Length == 2)
+                if (spiritspeak == "0")
                 {
-                    if (spiritspeak == "0/0")
+                    SpiritSpeakMin = "---";
+                    SpiritSpeakMax = "---";
+                }
+                else
+                {
+                    if (double.TryParse(spiritspeakArray[0], out double minSpiritSpeak))
                     {
-                        SpiritSpeakMin = "---";
-                        SpiritSpeakMax = "---";
+                        SpiritSpeakMin = minSpiritSpeak.ToString("0.0");
                     }
-                    else
+                    if (int.TryParse(spiritspeakArray[1], out int maxSpiritSpeak))
                     {
-                        if (double.TryParse(spiritspeakArray[0], out double minSpiritSpeak))
-                        {
-                            SpiritSpeakMin = minSpiritSpeak.ToString("0.0");
-                        }
-                        if (int.TryParse(spiritspeakArray[1], out int maxSpiritSpeak))
-                        {
-                            SpiritSpeakMax = maxSpiritSpeak.ToString();
-                        }
+                        SpiritSpeakMax = maxSpiritSpeak.ToString();
                     }
                 }
             }
@@ -1033,23 +994,20 @@ namespace RazorEnhanced
             if (parseDict.TryGetValue("mysticism", out string mysticism))
             {
                 var mysticismArray = mysticism.Split('/');
-                if (mysticismArray.Length == 2)
+                if (mysticism == "0")
                 {
-                    if (mysticism == "0/0")
+                    MysticismMin = "---";
+                    MysticismMax = "---";
+                }
+                else
+                {
+                    if (double.TryParse(mysticismArray[0], out double minMysticism))
                     {
-                        MysticismMin = "---";
-                        MysticismMax = "---";
+                        MysticismMin = minMysticism.ToString("0.0");
                     }
-                    else
+                    if (int.TryParse(mysticismArray[1], out int maxMysticism))
                     {
-                        if (double.TryParse(mysticismArray[0], out double minMysticism))
-                        {
-                            MysticismMin = minMysticism.ToString("0.0");
-                        }
-                        if (int.TryParse(mysticismArray[1], out int maxMysticism))
-                        {
-                            MysticismMax = maxMysticism.ToString();
-                        }
+                        MysticismMax = maxMysticism.ToString();
                     }
                 }
             }
@@ -1057,23 +1015,20 @@ namespace RazorEnhanced
             if (parseDict.TryGetValue("focus", out string focus))
             {
                 var focusArray = focus.Split('/');
-                if (focusArray.Length == 2)
+                if (focus == "0")
                 {
-                    if (focus == "0/0")
+                    FocusMin = "---";
+                    FocusMax = "---";
+                }
+                else
+                {
+                    if (double.TryParse(focusArray[0], out double minFocus))
                     {
-                        FocusMin = "---";
-                        FocusMax = "---";
+                        FocusMin = minFocus.ToString("0.0");
                     }
-                    else
+                    if (int.TryParse(focusArray[1], out int maxFocus))
                     {
-                        if (double.TryParse(focusArray[0], out double minFocus))
-                        {
-                            FocusMin = minFocus.ToString("0.0");
-                        }
-                        if (int.TryParse(focusArray[1], out int maxFocus))
-                        {
-                            FocusMax = maxFocus.ToString();
-                        }
+                        FocusMax = maxFocus.ToString();
                     }
                 }
             }
@@ -1081,23 +1036,20 @@ namespace RazorEnhanced
             if (parseDict.TryGetValue("spellweaving", out string spellweaving))
             {
                 var spellweavingArray = spellweaving.Split('/');
-                if (spellweavingArray.Length == 2)
+                if (spellweaving == "0")
                 {
-                    if (spellweaving == "0/0")
+                    SpellweavingMin = "---";
+                    SpellweavingMax = "---";
+                }
+                else
+                {
+                    if (double.TryParse(spellweavingArray[0], out double minSpellweaving))
                     {
-                        SpellweavingMin = "---";
-                        SpellweavingMax = "---";
+                        SpellweavingMin = minSpellweaving.ToString("0.0");
                     }
-                    else
+                    if (int.TryParse(spellweavingArray[1], out int maxSpellweaving))
                     {
-                        if (double.TryParse(spellweavingArray[0], out double minSpellweaving))
-                        {
-                            SpellweavingMin = minSpellweaving.ToString("0.0");
-                        }
-                        if (int.TryParse(spellweavingArray[1], out int maxSpellweaving))
-                        {
-                            SpellweavingMax = maxSpellweaving.ToString();
-                        }
+                        SpellweavingMax = maxSpellweaving.ToString();
                     }
                 }
             }
@@ -1105,23 +1057,20 @@ namespace RazorEnhanced
             if (parseDict.TryGetValue("discordance", out string discordance))
             {
                 var discordanceArray = discordance.Split('/');
-                if (discordanceArray.Length == 2)
+                if (discordance == "0")
                 {
-                    if (discordance == "0/0")
+                    DiscordanceMin = "---";
+                    DiscordanceMax = "---";
+                }
+                else
+                {
+                    if (double.TryParse(discordanceArray[0], out double minDiscordance))
                     {
-                        DiscordanceMin = "---";
-                        DiscordanceMax = "---";
+                        DiscordanceMin = minDiscordance.ToString("0.0");
                     }
-                    else
+                    if (int.TryParse(discordanceArray[1], out int maxDiscordance))
                     {
-                        if (double.TryParse(discordanceArray[0], out double minDiscordance))
-                        {
-                            DiscordanceMin = minDiscordance.ToString("0.0");
-                        }
-                        if (int.TryParse(discordanceArray[1], out int maxDiscordance))
-                        {
-                            DiscordanceMax = maxDiscordance.ToString();
-                        }
+                        DiscordanceMax = maxDiscordance.ToString();
                     }
                 }
             }
@@ -1129,23 +1078,20 @@ namespace RazorEnhanced
             if (parseDict.TryGetValue("bushido", out string bushido))
             {
                 var bushidoArray = bushido.Split('/');
-                if (bushidoArray.Length == 2)
+                if (bushido == "0")
                 {
-                    if (bushido == "0/0")
+                    BushidoMin = "---";
+                    BushidoMax = "---";
+                }
+                else
+                {
+                    if (double.TryParse(bushidoArray[0], out double minBushido))
                     {
-                        BushidoMin = "---";
-                        BushidoMax = "---";
+                        BushidoMin = minBushido.ToString("0.0");
                     }
-                    else
+                    if (int.TryParse(bushidoArray[1], out int maxBushido))
                     {
-                        if (double.TryParse(bushidoArray[0], out double minBushido))
-                        {
-                            BushidoMin = minBushido.ToString("0.0");
-                        }
-                        if (int.TryParse(bushidoArray[1], out int maxBushido))
-                        {
-                            BushidoMax = maxBushido.ToString();
-                        }
+                        BushidoMax = maxBushido.ToString();
                     }
                 }
             }
@@ -1153,23 +1099,20 @@ namespace RazorEnhanced
             if (parseDict.TryGetValue("ninjitsu", out string ninjitsu))
             {
                 var ninjitsuArray = ninjitsu.Split('/');
-                if (ninjitsuArray.Length == 2)
+                if (ninjitsu == "0")
                 {
-                    if (ninjitsu == "0/0")
+                    NinjitsuMin = "---";
+                    NinjitsuMax = "---";
+                }
+                else
+                {
+                    if (double.TryParse(ninjitsuArray[0], out double minNinjitsu))
                     {
-                        NinjitsuMin = "---";
-                        NinjitsuMax = "---";
+                        NinjitsuMin = minNinjitsu.ToString("0.0");
                     }
-                    else
+                    if (int.TryParse(ninjitsuArray[1], out int maxNinjitsu))
                     {
-                        if (double.TryParse(ninjitsuArray[0], out double minNinjitsu))
-                        {
-                            NinjitsuMin = minNinjitsu.ToString("0.0");
-                        }
-                        if (int.TryParse(ninjitsuArray[1], out int maxNinjitsu))
-                        {
-                            NinjitsuMax = maxNinjitsu.ToString();
-                        }
+                        NinjitsuMax = maxNinjitsu.ToString();
                     }
                 }
             }
@@ -1177,23 +1120,20 @@ namespace RazorEnhanced
             if (parseDict.TryGetValue("chivalry", out string chivalry))
             {
                 var chivalryArray = chivalry.Split('/');
-                if (chivalryArray.Length == 2)
+                if (chivalry == "0")
                 {
-                    if (chivalry == "0/0")
+                    ChivalryMin = "---";
+                    ChivalryMax = "---";
+                }
+                else
+                {
+                    if (double.TryParse(chivalryArray[0], out double minChivalry))
                     {
-                        ChivalryMin = "---";
-                        ChivalryMax = "---";
+                        ChivalryMin = minChivalry.ToString("0.0");
                     }
-                    else
+                    if (int.TryParse(chivalryArray[1], out int maxChivalry))
                     {
-                        if (double.TryParse(chivalryArray[0], out double minChivalry))
-                        {
-                            ChivalryMin = minChivalry.ToString("0.0");
-                        }
-                        if (int.TryParse(chivalryArray[1], out int maxChivalry))
-                        {
-                            ChivalryMax = maxChivalry.ToString();
-                        }
+                        ChivalryMax = maxChivalry.ToString();
                     }
                 }
             }
@@ -1271,7 +1211,6 @@ namespace RazorEnhanced
                 ResistEnergyMinRange = ResistEnergyRange == "" ? "" : ResistEnergyRange.Split('-')[0];
                 ResistEnergyMaxRange = ResistEnergyRange == "" ? "" : ResistEnergyRange.Split('-')[1];
             }
-
             (Rarity, RarityColour, Status) = GetRarityStatus(rarityColours);
             (TotalStats, TotalStatsValue) = CalculateStats(this);
             (TotalHits, TotalHitsValue) = CalculateHits(this);
@@ -1390,9 +1329,9 @@ namespace RazorEnhanced
 
         public (string, string) CalculateResists(Pet myPet)
         {
+
             string totalResists = "";
             string totalResistsValue = "";
-
             int resists = int.Parse(myPet.ResistPhysical) + int.Parse(myPet.ResistFire) + int.Parse(myPet.ResistCold) + int.Parse(myPet.ResistPoison) + int.Parse(myPet.ResistEnergy);
             int resistsValue = int.Parse(myPet.ResistPhysicalMaxRange) + int.Parse(myPet.ResistFireMaxRange) + int.Parse(myPet.ResistColdMaxRange) + int.Parse(myPet.ResistPoisonMaxRange) + int.Parse(myPet.ResistEnergyMaxRange);
             totalResists = resists.ToString();
