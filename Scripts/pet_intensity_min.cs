@@ -61,7 +61,7 @@ namespace RazorEnhanced
                 string gumpTextProcess = gumpTextString.Substring(gumpTextString.IndexOf('<'));
 
                 // Detect whether the target is a pet with training in progress.  Needed since the server response is different.
-                // UO Alive: Last <div align=right> is the training progress.
+                // UO Alive: Last <div align=right> is the training progress. Last % is also for training progress.
                 int startIndex  = gumpTextString.LastIndexOf("<div align=right>") + "<div align=right>".Length;
                 int endIndex    = gumpTextString.LastIndexOf("%")+1;
                 bool trainedPet = false;
@@ -83,7 +83,6 @@ namespace RazorEnhanced
 
                 // Define all values / properties for the pet.
                 Pet myPet = new Pet(parseDict, rarityColours, petDefinitions, hexBreed);
-                
                 // Show the GUI.
                 CreateMenuInstance(myPet, parseDict, petDefinitions);
             }
@@ -97,12 +96,20 @@ namespace RazorEnhanced
 
         public static Dictionary<string, string> Parse(string input, bool trainedPet)
         {
-            var values = input.Split(',');
+            var values = new List<string>(input.Split(','));
             var keys   = new List<string>();
 
+            //First value is the hex value of the pet. Skip it.
+            values.RemoveAt(0);
+            
+            //Sometimes there's a / as the next value. Skip it in that case.
+            if (values[0] == "/") {
+                values.RemoveAt(0);
+            }
+            
             // Determine whether the pet is trained/tame or not.
             if (trainedPet)
-            {
+            {                
             keys = new List<string> {"strength", "dexterity","intelligence", "hits", "stamina", "mana",  "resistphysical"
                                         , "resistfire", "resistcold", "resistpoison", "resistenergy", "damagephysical"
                                         , "damagefire", "damagecold", "damagepoison", "damageenergy", "wrestling", "tactics"
@@ -120,16 +127,13 @@ namespace RazorEnhanced
                                         , "parrying", "magery", "evalintelligence","meditation", "necromancy", "spiritspeak"
                                         , "mysticism", "focus", "spellweaving","discordance", "bushido", "ninjitsu", "chivalry"
                                         , "hpregen", "staminaregen", "manaregen", "damage", "bardingdifficulty", "slots" };
-
             }
             
             var dict = new Dictionary<string, string>();
             
-
-            for (int i = 0; i < keys.Count && i < values.Length; i++)            
-            //First value is the hex value of the pet. Skip it.
+            for (int i = 0; i < keys.Count && i < values.Count; i++)
             {
-                dict.Add(keys[i], values[i+1]);
+                dict.Add(keys[i], values[i]);                
             }
 
             return dict;
@@ -1162,16 +1166,24 @@ namespace RazorEnhanced
             string targetRarityColour;
             string targetStatus;
             string targetName;
-            int _nameTest = targetPropTextString.IndexOf('[');
-
-            if( _nameTest > 0)
+            // Name Testing gets... weird. Edge cases here.
+            int nameTest = targetPropTextString.IndexOf('[');
+            
+            if( nameTest > 0)
             {
-                targetName = _nameTest != -1 ? targetPropTextString.Substring(0, _nameTest).Trim() : targetPropTextString.Trim();
+                targetName = nameTest != -1 ? targetPropTextString.Substring(0, nameTest).Trim() : targetPropTextString.Trim();
             }
             else
             {
-                int _commaIndex = targetPropTextString.IndexOf(',');
-                targetName = targetPropTextString.Substring(0, _commaIndex).Trim();
+                int commaIndex = targetPropTextString.IndexOf(',');
+                if ( commaIndex > 0 ) 
+                {
+                    targetName = targetPropTextString.Substring(0, commaIndex).Trim();
+                }
+                else
+                {
+                    targetName = targetPropTextString;
+                }    
             }
             
             Handler.SendMessage(MessageType.Debug, $"Pet Def: {targetPropTextString}");
@@ -1185,7 +1197,7 @@ namespace RazorEnhanced
             {
                 targetStatus = "Tamed";
             }
-                
+    
             if (rarityColours.TryGetValue(targetPropTextString, out targetRarityColour))
             {
                 return (targetPropTextString, targetRarityColour, targetStatus, targetName);
