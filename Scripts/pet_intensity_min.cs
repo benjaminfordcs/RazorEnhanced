@@ -62,10 +62,13 @@ namespace RazorEnhanced
 
                 // Detect whether the target is a pet with training in progress.  Needed since the server response is different.
                 // UO Alive: Last <div align=right> is the training progress.
-                int startIndex      = gumpTextString.LastIndexOf("<div align=right>") + "<div align=right>".Length;
-                int endIndex        = gumpTextString.LastIndexOf("%")+1;
-                string capturedText = gumpTextString.Substring(startIndex, endIndex - startIndex);
-                bool trainedPet     = capturedText.Contains("%");
+                int startIndex  = gumpTextString.LastIndexOf("<div align=right>") + "<div align=right>".Length;
+                int endIndex    = gumpTextString.LastIndexOf("%")+1;
+                bool trainedPet = false;
+                if (endIndex > startIndex) {
+                    string capturedText = gumpTextString.Substring(startIndex, endIndex - startIndex);
+                    trainedPet          = capturedText.Contains("%");
+                }
 
                 // Remove all the unnecessary text from the string.
                 //string regexPattern = @"<[^>]+>|%|";
