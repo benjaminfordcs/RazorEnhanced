@@ -126,7 +126,7 @@ namespace RazorEnhanced
             for (int i = 0; i < keys.Count && i < values.Length; i++)            
             //First value is the hex value of the pet. Skip it.
             {
-                dict.Add(keys[i], values[i+1]);                
+                dict.Add(keys[i], values[i+1]);
             }
 
             return dict;
