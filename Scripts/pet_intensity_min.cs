@@ -627,7 +627,6 @@ namespace RazorEnhanced
 
             if (parseDict.TryGetValue("wrestling", out string wrestling))
             {
-                Player.HeadMessage(52, "Wrestling: " + wrestling);
                 var wrestlingArray = wrestling.Split('/');
                 if (wrestling == "0")
                 {
