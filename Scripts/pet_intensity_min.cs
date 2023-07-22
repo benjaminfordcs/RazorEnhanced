@@ -103,7 +103,7 @@ namespace RazorEnhanced
             values.RemoveAt(0);
             
             //Sometimes there's a / as the next value. Skip it in that case.
-            if (values[0] == "/") {
+            if (values[0] == "/" || values[0] == "[]") {
                 values.RemoveAt(0);
             }
             
