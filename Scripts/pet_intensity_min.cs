@@ -29,76 +29,95 @@ namespace RazorEnhanced
 {
     public class IntensityInspect
     {
+        uint animalLoreGump = 4275505285; //Periodically update this when it breaks
         public void Run()
         {
-            Gumps.ResetGump();
-            string gumpIDList = string.Join(",", Gumps.AllGumpIDs());
-            Handler.SendMessage(MessageType.Debug, $"GumpList: {gumpIDList}");
-            if (gumpIDList.Contains("3644314075"))
+            try {
+                Gumps.ResetGump();
+                string gumpIDList = string.Join(",", Gumps.AllGumpIDs());
+                Handler.SendMessage(MessageType.Debug, $"GumpList: {gumpIDList}");
+                if (gumpIDList.Contains($"{animalLoreGump}"))
+                {
+                    Player.HeadMessage(52, "Please close the Animal Lore gump");
+                    return;
+                }
+                {
+                    Player.UseSkill("Animal Lore");
+                    Gumps.WaitForGump(animalLoreGump,50000);
+                }
+
+                // Assemble the mobile ID based off of the last target.
+                var targetID = Mobiles.FindBySerial(Target.GetLast()).Body;
+                string hexBreed = "0x" + targetID.ToString("X4"); 
+
+                if (!petDefinitions.ContainsKey(hexBreed))
+                {
+                    string _message = "Target Animal (" + hexBreed + ") could not be found.  Let mukkel know!";
+                    Player.HeadMessage(52, _message);
+                    return;
+                }
+
+                // Pull in the gump text from the last gump opened.  NOTE: Change this to GetLineList() whenever it gets fixed.
+                string gumpTextString = string.Join(",", Gumps.LastGumpGetLineList());
+                string gumpTextProcess = gumpTextString.Substring(gumpTextString.IndexOf('<'));
+
+                // Detect whether the target is a pet with training in progress.  Needed since the server response is different.
+                // UO Alive: Last <div align=right> is the training progress. Last % is also for training progress.
+                int startIndex  = gumpTextString.LastIndexOf("<div align=right>") + "<div align=right>".Length;
+                int endIndex    = gumpTextString.LastIndexOf("%")+1;
+                bool trainedPet = false;
+                if (endIndex > startIndex) {
+                    string capturedText = gumpTextString.Substring(startIndex, endIndex - startIndex);
+                    trainedPet          = capturedText.Contains("%");
+                }
+
+                // Remove all the unnecessary text from the string.
+                //string regexPattern = @"<[^>]+>|%|";
+                string regexPattern = @"(<[^>]+>|%|[a-zA-Z])";
+                string outputString = Regex.Replace(gumpTextProcess, regexPattern, "").Replace("---", "0").Replace("-", "/")
+                                            .Replace("=>", "/").Replace("~1_~", "").Replace(" / ", "/").Replace(", ", ",")
+                                            .Replace(" ,", ",").Replace("  (. ", ",").Replace("),", ",").Replace("&", "");
+                outputString = string.Join(",", outputString.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries));
+
+                // Populate the dictionary values with the data from the gump.
+                var parseDict = Parse(outputString, trainedPet);
+
+                // Define all values / properties for the pet.
+                Pet myPet = new Pet(parseDict, rarityColours, petDefinitions, hexBreed);
+                // Show the GUI.
+                CreateMenuInstance(myPet, parseDict, petDefinitions);
+            }
+            catch (Exception e)
             {
-                Player.HeadMessage(52, "Please close the Animal Lore gump");
+                Player.HeadMessage(52, "Error: Check the log.");
+                Handler.SendMessage(MessageType.Debug, e.Message);
                 return;
             }
-            {
-                Player.UseSkill("Animal Lore");
-                Gumps.WaitForGump(3644314075,50000);
-            }
-
-            // Assemble the mobile ID based off of the last target.
-            var targetID = Mobiles.FindBySerial(Target.GetLast()).Body;
-            string hexBreed = "0x" + targetID.ToString("X4"); 
-
-            if (!petDefinitions.ContainsKey(hexBreed))
-            {
-                string _message = "Target Animal (" + hexBreed + ") could not be found.  Let mukkel know!";
-                Player.HeadMessage(52, _message);
-                return;
-            }
-
-            // Pull in the gump text from the last gump opened.  NOTE: Change this to GetLineList() whenever it gets fixed.
-            string gumpTextString = string.Join(",", Gumps.LastGumpGetLineList());
-            string gumpTextProcess = gumpTextString.Substring(gumpTextString.IndexOf('<'));
-
-            // Detect whether the target is a pet with training in progress.  Needed since the server response is different.
-            int startIndex = gumpTextString.IndexOf("<div align=right>") + "<div align=right>".Length;
-            int endIndex = gumpTextString.IndexOf("</div>", startIndex);
-            string capturedText = gumpTextString.Substring(startIndex, endIndex - startIndex);
-            bool trainedPet = capturedText.Contains("%");
-
-            // Remove all the unnecessary text from the string.
-            //string regexPattern = @"<[^>]+>|%|";
-            string regexPattern = @"(<[^>]+>|%|[a-zA-Z])";
-            string outputString = Regex.Replace(gumpTextProcess, regexPattern, "").Replace("---", "0").Replace("-", "/")
-                                        .Replace("=>", "/").Replace("~1_~", "").Replace(" / ", "/").Replace(", ", ",")
-                                        .Replace(" ,", ",").Replace("  (. ", ",").Replace("),", ",").Replace("&", "");
-            outputString = string.Join(",", outputString.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries));
-
-            // Populate the dictionary values with the data from the gump.
-            var parseDict = Parse(outputString, trainedPet);
-
-            // Define all values / properties for the pet.
-            Pet myPet = new Pet(parseDict, rarityColours, petDefinitions, hexBreed);
-
-            // Show the GUI.
-            CreateMenuInstance(myPet, parseDict, petDefinitions);
         }
 
         public static Dictionary<string, string> Parse(string input, bool trainedPet)
         {
-            var values = input.Split(',');
-            var keys = new List<string>();
+            var values = new List<string>(input.Split(','));
+            var keys   = new List<string>();
 
+            //First value is the hex value of the pet. Skip it.
+            values.RemoveAt(0);
+            
+            //Sometimes there's a / as the next value. Skip it in that case.
+            if (values[0] == "/" || values[0] == "[]") {
+                values.RemoveAt(0);
+            }
+            
             // Determine whether the pet is trained/tame or not.
             if (trainedPet)
-            {
-            keys = new List<string> {"progress", "hits", "stamina", "mana", "strength", "dexterity", 
-                                        "intelligence", "bardingdifficulty", "hpregen", "staminaregen", "manaregen", 
-                                        "resistphysical", "resistfire", "resistcold", "resistpoison", "resistenergy", 
-                                        "damagephysical", "damagefire", "damagecold", "damagepoison", "damageenergy", 
-                                        "damage", "wrestling", "tactics", "resistingspells", "anatomy", "healing", 
-                                        "poisoning", "detectinghidden", "hiding", "parrying", "magery", "evalintelligence",
-                                        "meditation", "necromancy", "spiritspeak", "mysticism", "focus", "spellweaving", 
-                                        "discordance", "bushido", "ninjitsu", "chivalry", "slots" };
+            {                
+            keys = new List<string> {"strength", "dexterity","intelligence", "hits", "stamina", "mana",  "resistphysical"
+                                        , "resistfire", "resistcold", "resistpoison", "resistenergy", "damagephysical"
+                                        , "damagefire", "damagecold", "damagepoison", "damageenergy", "wrestling", "tactics"
+                                        , "resistingspells", "anatomy", "healing", "poisoning", "detectinghidden", "hiding"
+                                        , "parrying", "magery", "evalintelligence","meditation", "necromancy", "spiritspeak"
+                                        , "mysticism", "focus", "spellweaving","discordance", "bushido", "ninjitsu", "chivalry"
+                                        , "hpregen", "staminaregen", "manaregen", "damage", "bardingdifficulty", "slots", "progress" };
             }
             else
             {
@@ -109,15 +128,14 @@ namespace RazorEnhanced
                                         , "parrying", "magery", "evalintelligence","meditation", "necromancy", "spiritspeak"
                                         , "mysticism", "focus", "spellweaving","discordance", "bushido", "ninjitsu", "chivalry"
                                         , "hpregen", "staminaregen", "manaregen", "damage", "bardingdifficulty", "slots" };
-
             }
             
             var dict = new Dictionary<string, string>();
-
-            for (int i = 0; i < keys.Count && i < values.Length; i++)
-                {
-                    dict.Add(keys[i], values[i]);
-                }
+            
+            for (int i = 0; i < keys.Count && i < values.Count; i++)
+            {
+                dict.Add(keys[i], values[i]);                
+            }
 
             return dict;
         }
@@ -188,6 +206,7 @@ namespace RazorEnhanced
             { "0x0013", new string[] { "Dread Spider? 13, FALSE,115-147,,146-150,,236-324,,231-279,,146-165,,285-321,,45-55,35-45,35-45,100-100,35-45"}},
             { "0x000C", new string[] { "Dragon? 0C, FALSE,478-495,,86-105,,436-475,,796-825,,86-105,,436-475,,55-65,60-70,30-40,25-35,35-45"}},
             { "0x000B", new string[] { "Dread Spider, FALSE,115-147,,146-150,,236-324,,231-279,,146-165,,285-321,,45-55,35-45,35-45,100-100,35-45"}},
+            { "0x00F3", new string[] { "Lesser Hiryu, TRUE,200-300,400-600,85-135,170-270,60-60,60-60,150-205,300-410,85-135,170-270,300-325,300-325,45-70,60-80,5-15,30-40,30-40"}},
         };
 
         public void CreateMenuInstance(Pet myPet, Dictionary<string, string> parseDict, Dictionary<string, string[]> petDict)
@@ -512,7 +531,6 @@ namespace RazorEnhanced
         {
             //if (parseDict.TryGetValue("name", out string name))
             //    Name = name;
-
             if (parseDict.TryGetValue("hits", out string hits))
             {
                 var hitsArray = hits.Split('/');
@@ -635,7 +653,7 @@ namespace RazorEnhanced
                     }
                 }
             }
-
+            
             if (parseDict.TryGetValue("tactics", out string tactics))
             {
                 var tacticsArray = tactics.Split('/');
@@ -1056,7 +1074,7 @@ namespace RazorEnhanced
                     }
                 }
             }*/
-
+            
             if (parseDict.TryGetValue("slots", out string slots))
             {
                 var slotsArray = slots.Split('/');
@@ -1149,16 +1167,24 @@ namespace RazorEnhanced
             string targetRarityColour;
             string targetStatus;
             string targetName;
-            int _nameTest = targetPropTextString.IndexOf('[');
-
-            if( _nameTest > 0)
+            // Name Testing gets... weird. Edge cases here.
+            int nameTest = targetPropTextString.IndexOf('[');
+            
+            if( nameTest > 0)
             {
-                targetName = _nameTest != -1 ? targetPropTextString.Substring(0, _nameTest).Trim() : targetPropTextString.Trim();
+                targetName = nameTest != -1 ? targetPropTextString.Substring(0, nameTest).Trim() : targetPropTextString.Trim();
             }
             else
             {
-                int _commaIndex = targetPropTextString.IndexOf(',');
-                targetName = targetPropTextString.Substring(0, _commaIndex).Trim();
+                int commaIndex = targetPropTextString.IndexOf(',');
+                if ( commaIndex > 0 ) 
+                {
+                    targetName = targetPropTextString.Substring(0, commaIndex).Trim();
+                }
+                else
+                {
+                    targetName = targetPropTextString;
+                }    
             }
             
             Handler.SendMessage(MessageType.Debug, $"Pet Def: {targetPropTextString}");
@@ -1172,7 +1198,7 @@ namespace RazorEnhanced
             {
                 targetStatus = "Tamed";
             }
-                
+    
             if (rarityColours.TryGetValue(targetPropTextString, out targetRarityColour))
             {
                 return (targetPropTextString, targetRarityColour, targetStatus, targetName);
