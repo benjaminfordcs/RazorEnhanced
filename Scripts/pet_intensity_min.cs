@@ -29,20 +29,21 @@ namespace RazorEnhanced
 {
     public class IntensityInspect
     {
+        uint animalLoreGump = 4275505285; //Periodically update this when it breaks
         public void Run()
         {
             try {
                 Gumps.ResetGump();
                 string gumpIDList = string.Join(",", Gumps.AllGumpIDs());
                 Handler.SendMessage(MessageType.Debug, $"GumpList: {gumpIDList}");
-                if (gumpIDList.Contains("3644314075"))
+                if (gumpIDList.Contains($"{animalLoreGump}"))
                 {
                     Player.HeadMessage(52, "Please close the Animal Lore gump");
                     return;
                 }
                 {
                     Player.UseSkill("Animal Lore");
-                    Gumps.WaitForGump(3644314075,50000);
+                    Gumps.WaitForGump(animalLoreGump,50000);
                 }
 
                 // Assemble the mobile ID based off of the last target.
