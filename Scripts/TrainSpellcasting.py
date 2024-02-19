@@ -23,7 +23,7 @@ weapon = Player.GetItemOnLayer("LeftHand")
 mageWeaponValue = Items.GetPropValue(weapon, "Mage Weapon")
 
 # TODO: Make this a list with applicable skills, then iterate
-skillToRaise = "Chivalry"
+skillToRaise = "Bushido"
 currentSkillCap = Player.GetSkillCap(skillToRaise)
 
 # TODO: Fill these out with the other spells from UOGuide
@@ -31,7 +31,7 @@ magerySpellDict = {currentSkillCap: "Earthquake"}
 spellweavingSpellDict = {89: "Essence of Wind", 103: "Wildfire", currentSkillCap: "Word of Death"} # Key: Max Skill to cast
 necromancySpellDict = {currentSkillCap: "Vampiric Embrace"}
 chivalrySpellDict = {45: "Consecrate Weapon", 60: "Divine Fury", 70: "Enemy of One", currentSkillCap: "Holy Light"}
-bushidoSpellDict = {60: "Confidence", 75: "Counter Attack", 105: "Momentum Strike"}
+bushidoSpellDict = {60: "Confidence", 77.5: "Counter Attack"} # Bushido is special in that the high-value skills need a hostile target.
 
 spellDict = {
     "Magery": magerySpellDict,
@@ -52,7 +52,8 @@ def getCurrentSpell(currentSkill):
     stoppingPoint = currentSkillCap + 0.01
     lowestSkillBreakpointToCast = stoppingPoint
     
-    for skillBreakpoint in spellDict[currentSkill].keys():
+    # Sort the list so we go through the breakpoints in order.
+    for skillBreakpoint in sorted(list(spellDict[currentSkill].keys())):
         if currentSkillValue < skillBreakpoint:
             # Valid spell to train on
             if lowestSkillBreakpointToCast > skillBreakpoint:
