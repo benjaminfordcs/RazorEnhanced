@@ -1,7 +1,6 @@
-# WIP
 # If you're training Spellweaving, use at your own risk!! 
 # Word of Death can hurt. Discard your focus crystal prior to running and make sure you have Greater Heal!
-# If you're training Magery or Necromancy or Mysticism, make sure your spell training gear gives you 100% LRC
+# If you're training... anything but Spellweaving, make sure your spell training gear gives you 100% LRC
 
 # TODO: Allow specification of a healing spell
 
@@ -11,25 +10,35 @@
 # If you specify an empty dress list, this script won't undress or dress
 dressList = "spell training" 
 
-maxManaCostForTrainingSpell=50
+maxManaCostDict = {
+    "Magery": 50,
+    "Spellweaving": 50,
+    "Necromancy": 50,
+    "Chivalry": 20,
+    "Bushido": 10
+}
 
 # If we have a mage weapon, get the value so we can calculate the real skill value
 weapon = Player.GetItemOnLayer("LeftHand")
 mageWeaponValue = Items.GetPropValue(weapon, "Mage Weapon")
 
 # TODO: Make this a list with applicable skills, then iterate
-skillToRaise = "Necromancy"
+skillToRaise = "Chivalry"
 currentSkillCap = Player.GetSkillCap(skillToRaise)
 
 # TODO: Fill these out with the other spells from UOGuide
 magerySpellDict = {currentSkillCap: "Earthquake"}
 spellweavingSpellDict = {89: "Essence of Wind", 103: "Wildfire", currentSkillCap: "Word of Death"} # Key: Max Skill to cast
 necromancySpellDict = {currentSkillCap: "Vampiric Embrace"}
+chivalrySpellDict = {45: "Consecrate Weapon", 60: "Divine Fury", 70: "Enemy of One", currentSkillCap: "Holy Light"}
+bushidoSpellDict = {60: "Confidence", 75: "Counter Attack", 105: "Momentum Strike"}
 
 spellDict = {
     "Magery": magerySpellDict,
     "Spellweaving" : spellweavingSpellDict,
-    "Necromancy": necromancySpellDict
+    "Necromancy": necromancySpellDict,
+    "Chivalry" : chivalrySpellDict,
+    "Bushido": bushidoSpellDict
 }
 
 def getCurrentSpell(currentSkill):
@@ -86,6 +95,12 @@ def castSpell(currentSkill, spellName):
     elif currentSkill == "Necromancy":
         Spells.CastNecro(currentSpell)
         Misc.Pause(4000)
+    elif currentSkill == "Chivalry":
+        Spells.CastChivalry(currentSpell)
+        Misc.Pause(4000)
+    elif currentSkill == "Bushido":
+        Spells.CastBushido(currentSpell)
+        Misc.Pause(4000)
         
 def getDressed():
     Dress.DressFStart()
@@ -110,7 +125,7 @@ while Player.GetSkillValue(skillToRaise) < currentSkillCap:
     castSpell(skillToRaise, currentSpell)
    
     # Undress when low on mana
-    if Player.Mana < maxManaCostForTrainingSpell:
+    if Player.Mana < maxManaCostDict[skillToRaise]:
         Misc.SendMessage("Low on mana. Meditate.", False)
         if dressList != "":
             getUndressed()
