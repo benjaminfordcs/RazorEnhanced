@@ -15,7 +15,8 @@ maxManaCostDict = {
     "Spellweaving": 50,
     "Necromancy": 50,
     "Chivalry": 20,
-    "Bushido": 10
+    "Bushido": 10,
+    "Mysticism": 50
 }
 
 # If we have a mage weapon, get the value so we can calculate the real skill value
@@ -23,22 +24,24 @@ weapon = Player.GetItemOnLayer("LeftHand")
 mageWeaponValue = Items.GetPropValue(weapon, "Mage Weapon")
 
 # TODO: Make this a list with applicable skills, then iterate
-skillToRaise = "Bushido"
+skillToRaise = "Spellweaving"
 currentSkillCap = Player.GetSkillCap(skillToRaise)
 
 # TODO: Fill these out with the other spells from UOGuide
-magerySpellDict = {currentSkillCap: "Earthquake"}
-spellweavingSpellDict = {89: "Essence of Wind", 103: "Wildfire", currentSkillCap: "Word of Death"} # Key: Max Skill to cast
+magerySpellDict = {65: "Poison Field", 80: "Reveal", 87: "Mass Dispel", currentSkillCap: "Earthquake"}
+spellweavingSpellDict = {15: "Arcane Circle", 32: "Immolating Weapon", 52: "Reaper Form", 89: "Essence of Wind", 103: "Wildfire", currentSkillCap: "Word of Death"} # Key: Max Skill to cast
 necromancySpellDict = {currentSkillCap: "Vampiric Embrace"}
 chivalrySpellDict = {45: "Consecrate Weapon", 60: "Divine Fury", 70: "Enemy of One", currentSkillCap: "Holy Light"}
 bushidoSpellDict = {60: "Confidence", 77.5: "Counter Attack"} # Bushido is special in that the high-value skills need a hostile target.
+mysticismSpellDict = {62: "Stone Form", 83: "Cleansing Winds", currentSkillCap: "Nether Cyclone"}
 
 spellDict = {
     "Magery": magerySpellDict,
     "Spellweaving" : spellweavingSpellDict,
     "Necromancy": necromancySpellDict,
     "Chivalry" : chivalrySpellDict,
-    "Bushido": bushidoSpellDict
+    "Bushido": bushidoSpellDict,
+    "Mysticism": mysticismSpellDict
 }
 
 def getCurrentSpell(currentSkill):
@@ -91,6 +94,9 @@ def castSpell(currentSkill, spellName):
             Misc.Pause(4000)
     elif currentSkill == "Magery":
         Spells.CastMagery(currentSpell)
+        if currentSpell in ["Poison Field", "Reveal", "Energy Field", "Mass Dispel"]:
+            Target.WaitForTarget(10000, False)
+            Target.Self()
         # TODO: Consider making a pause dict for each spell...
         Misc.Pause(4000)
     elif currentSkill == "Necromancy":
@@ -101,6 +107,13 @@ def castSpell(currentSkill, spellName):
         Misc.Pause(4000)
     elif currentSkill == "Bushido":
         Spells.CastBushido(currentSpell)
+        Misc.Pause(4000)
+    elif currentSkill == "Mysticism":
+        Spells.CastMysticism(currentSpell)
+        if currentSpell in ["Cleansing Winds", "Hail Storm", "Nether Cyclone"]:
+            Target.WaitForTarget(10000, False)
+            Target.Self()            
+        
         Misc.Pause(4000)
         
 def getDressed():
