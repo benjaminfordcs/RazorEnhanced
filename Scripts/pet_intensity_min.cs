@@ -1,3 +1,4 @@
+// Original Author: mukkel
 ////////////////////////////////////////////////////////////////
 //  Pet Intensity Evaluator - Designed originally for use
 //  on UO Alive.
