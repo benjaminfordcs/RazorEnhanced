@@ -1,5 +1,4 @@
-# NOTE: I could not find the author for this script! If you are the author, open a PR so I can attribute it to you!
-
+# Original author/repo: https://github.com/fspy/uo-scripts
 # This script will mine in place until there's no ore around, then yell at you
 # so you can move to a different location.
 # I'd advise using the world map and zooming in so you can see the 8x8 zones.
