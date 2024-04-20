@@ -1,14 +1,23 @@
+# 4/19/24: Thanks to Q for filling out the necro spell dict, eval int, and some other suggestions! 
+
 # If you're training Spellweaving, use at your own risk!! 
 # Word of Death can hurt. Discard your focus crystal prior to running and make sure you have Greater Heal!
 # If you're training... anything but Spellweaving, make sure your spell training gear gives you 100% LRC
 
 # TODO: Allow specification of a healing spell
-
+# TODO: When training necro, if the last time you cast Horrific Beast, puts you into that form, when it moves on to Wither, it will always fail.
+# TODO: When necro training is complete, check for, and remove, Lich Form before moving to the next skill – or you could die.
+# TODO: Come up with a system where the user can specify which skills are to be trained – Can the script check if the skill is set to go up/down/locked, and only train those skills that are set up, and skip ones locked or set to go down?
 
 # Update this to point to a list that specifies your equipped armor that blocks meditation.
 # Recommended dress drag delay: 500 ms
-# If you specify an empty dress list, this script won't undress or dress
-dressList = "spell training" 
+# If you specify an empty dress list "", this script won't undress or dress
+dressList = ""
+# dressList = "spell training"
+
+# skillsToRaise = ["Magery", "Necromancy", "Chivalry", "Bushido", "Mysticism", "EvalInt", "Spellweaving"]
+# TODO: Make this a list with applicable skills, then iterate. But figure out which skills of these the user wants to raise...
+skillToRaise = "Spellweaving"
 
 maxManaCostDict = {
     "Magery": 50,
@@ -23,17 +32,16 @@ maxManaCostDict = {
 weapon = Player.GetItemOnLayer("LeftHand")
 mageWeaponValue = Items.GetPropValue(weapon, "Mage Weapon")
 
-# TODO: Make this a list with applicable skills, then iterate
-skillToRaise = "Spellweaving"
 currentSkillCap = Player.GetSkillCap(skillToRaise)
 
 # TODO: Fill these out with the other spells from UOGuide
 magerySpellDict = {65: "Poison Field", 80: "Reveal", 87: "Mass Dispel", currentSkillCap: "Earthquake"}
 spellweavingSpellDict = {15: "Arcane Circle", 32: "Immolating Weapon", 52: "Reaper Form", 89: "Essence of Wind", 103: "Wildfire", currentSkillCap: "Word of Death"} # Key: Max Skill to cast
-necromancySpellDict = {currentSkillCap: "Vampiric Embrace"}
+necromancySpellDict = {40: "Curse Weapon", 50: "Pain Spike", 70: "Horrific Beast", 90: "Wither", currentSkillCap: "Lich Form"}
 chivalrySpellDict = {45: "Consecrate Weapon", 60: "Divine Fury", 70: "Enemy of One", currentSkillCap: "Holy Light"}
 bushidoSpellDict = {60: "Confidence", 77.5: "Counter Attack"} # Bushido is special in that the high-value skills need a hostile target.
 mysticismSpellDict = {62: "Stone Form", 83: "Cleansing Winds", currentSkillCap: "Nether Cyclone"}
+evalIntDict = {currentSkillCap: "Clumsy"}
 
 spellDict = {
     "Magery": magerySpellDict,
@@ -41,13 +49,14 @@ spellDict = {
     "Necromancy": necromancySpellDict,
     "Chivalry" : chivalrySpellDict,
     "Bushido": bushidoSpellDict,
-    "Mysticism": mysticismSpellDict
+    "Mysticism": mysticismSpellDict,
+    "EvalInt": evalIntDict
 }
 
 def getCurrentSpell(currentSkill):
     currentSkillValue=Player.GetSkillValue(currentSkill)
     
-    # Note, if we're training magery, your "currentSkillValue" will be modified by any mage weapon in your hand.
+    # Note, if training magery, your "currentSkillValue" will be modified by any mage weapon in your hand.
     if currentSkill == "Magery" and mageWeaponValue > 0:
         # Add in any mage weapon penalty back in since that's what your real skill is
         currentSkillValue += mageWeaponValue
@@ -101,6 +110,21 @@ def castSpell(currentSkill, spellName):
         Misc.Pause(4000)
     elif currentSkill == "Necromancy":
         Spells.CastNecro(currentSpell)
+        if currentSpell == "Pain Spike" and Player.Hits < 60:
+            while Player.Hits < 60:
+                Spells.Cast("Greater Heal")
+                Target.WaitForTarget(10000, False)
+                Target.Self()
+                Misc.Pause(1000)
+        if currentSpell == "Lich Form" and Player.Hits < 60:
+            while Player.Hits < 60:
+                Spells.Cast("Greater Heal")
+                Target.WaitForTarget(10000, False)
+                Target.Self()
+                Misc.Pause(1000)
+        if currentSpell in ["Pain Spike"]:
+            Target.WaitForTarget(10000, False)
+            Target.Self()
         Misc.Pause(4000)
     elif currentSkill == "Chivalry":
         Spells.CastChivalry(currentSpell)
@@ -112,9 +136,12 @@ def castSpell(currentSkill, spellName):
         Spells.CastMysticism(currentSpell)
         if currentSpell in ["Cleansing Winds", "Hail Storm", "Nether Cyclone"]:
             Target.WaitForTarget(10000, False)
-            Target.Self()            
-        
+            Target.Self()
         Misc.Pause(4000)
+    elif currentSkill == "EvalInt":
+        Spells.CastMagery(currentSpell)
+        Misc.Pause(4000)
+
         
 def getDressed():
     Dress.DressFStart()
@@ -151,3 +178,9 @@ while Player.GetSkillValue(skillToRaise) < currentSkillCap:
         # Dress when mana full
         if dressList != "":
             getDressed()
+
+# Before ending... make sure not in lich form. Or else.
+if Player.BuffsExist("Lich Form"):
+    while Player.BuffsExist("Lich Form"):
+        Spells.CastNecro("Lich Form")
+        Misc.Pause(4000)
