@@ -5,8 +5,6 @@
 # If you're training... anything but Spellweaving, make sure your spell training gear gives you 100% LRC
 
 # TODO: Allow specification of a healing spell
-# TODO: When training necro, if the last time you cast Horrific Beast, puts you into that form, when it moves on to Wither, it will always fail.
-# TODO: When necro training is complete, check for, and remove, Lich Form before moving to the next skill – or you could die.
 # TODO: Come up with a system where the user can specify which skills are to be trained – Can the script check if the skill is set to go up/down/locked, and only train those skills that are set up, and skip ones locked or set to go down?
 
 # Update this to point to a list that specifies your equipped armor that blocks meditation.
@@ -125,6 +123,9 @@ def castSpell(currentSkill, spellName):
         if currentSpell in ["Pain Spike"]:
             Target.WaitForTarget(10000, False)
             Target.Self()
+        if currentSpell in ["Wither"] and Player.BuffsExist("Horrific Beast"):
+            Spells.CastNecro("Horrific Beast")
+            Misc.Pause(4000) 
         Misc.Pause(4000)
     elif currentSkill == "Chivalry":
         Spells.CastChivalry(currentSpell)
