@@ -15,7 +15,7 @@ dressList = ""
 
 # skillsToRaise = ["Magery", "Necromancy", "Chivalry", "Bushido", "Mysticism", "EvalInt", "Spellweaving"]
 # TODO: Make this a list with applicable skills, then iterate. But figure out which skills of these the user wants to raise...
-skillToRaise = "Spellweaving"
+skillToRaise = "Magery"
 
 maxManaCostDict = {
     "Magery": 50,
@@ -29,11 +29,12 @@ maxManaCostDict = {
 # If we have a mage weapon, get the value so we can calculate the real skill value
 weapon = Player.GetItemOnLayer("LeftHand")
 mageWeaponValue = Items.GetPropValue(weapon, "Mage Weapon")
+wasMageWeaponEquipped = mageWeaponValue > 0 # Track whether or not a mage weapon was equipped at the start. May need to unequip...
 
 currentSkillCap = Player.GetSkillCap(skillToRaise)
 
 # TODO: Fill these out with the other spells from UOGuide
-magerySpellDict = {65: "Poison Field", 80: "Reveal", 87: "Mass Dispel", currentSkillCap: "Earthquake"}
+magerySpellDict = {20: "Clumsy", 40: "Bless", 65: "Poison Field", 80: "Reveal", 87: "Mass Dispel", currentSkillCap: "Earthquake"}
 spellweavingSpellDict = {15: "Arcane Circle", 32: "Immolating Weapon", 52: "Reaper Form", 89: "Essence of Wind", 103: "Wildfire", currentSkillCap: "Word of Death"} # Key: Max Skill to cast
 necromancySpellDict = {40: "Curse Weapon", 50: "Pain Spike", 70: "Horrific Beast", 90: "Wither", currentSkillCap: "Lich Form"}
 chivalrySpellDict = {45: "Consecrate Weapon", 60: "Divine Fury", 70: "Enemy of One", currentSkillCap: "Holy Light"}
@@ -51,13 +52,14 @@ spellDict = {
     "EvalInt": evalIntDict
 }
 
-def getCurrentSpell(currentSkill):
+def getCurrentSpell(currentSkill, effectiveMageWeaponValue):
     currentSkillValue=Player.GetSkillValue(currentSkill)
-    
+
     # Note, if training magery, your "currentSkillValue" will be modified by any mage weapon in your hand.
-    if currentSkill == "Magery" and mageWeaponValue > 0:
+    # But if your mage skill is lower than the mage weapon's value... you will fizzle a lot.
+    if currentSkill == "Magery" and effectiveMageWeaponValue > 0:
         # Add in any mage weapon penalty back in since that's what your real skill is
-        currentSkillValue += mageWeaponValue
+        currentSkillValue += effectiveMageWeaponValue
     
     stoppingPoint = currentSkillCap + 0.01
     lowestSkillBreakpointToCast = stoppingPoint
@@ -101,7 +103,7 @@ def castSpell(currentSkill, spellName):
             Misc.Pause(4000)
     elif currentSkill == "Magery":
         Spells.CastMagery(currentSpell)
-        if currentSpell in ["Poison Field", "Reveal", "Energy Field", "Mass Dispel"]:
+        if currentSpell in ["Clumsy", "Bless", "Poison Field", "Reveal", "Energy Field", "Mass Dispel"]:
             Target.WaitForTarget(10000, False)
             Target.Self()
         # TODO: Consider making a pause dict for each spell...
@@ -162,8 +164,25 @@ if dressList != "":
     Dress.ChangeList(dressList)
     getDressed()
 
-while Player.GetSkillValue(skillToRaise) < currentSkillCap:
-    currentSpell = getCurrentSpell(skillToRaise)
+while (Player.GetSkillValue(skillToRaise) + mageWeaponValue) < currentSkillCap:
+    # Do Mage weapon calculations only if we're actually training magery
+    if skillToRaise == "Magery":
+        currentRawMagerySkillValue = Player.GetSkillValue("Magery")
+        
+        effectiveMageWeaponValue = mageWeaponValue # Whether or not mage weapon is in effect is, well, whether or not it is equipped.
+        # If a mage weapon was unequipped earlier, and our magery skill is high enough, equip it.
+        if wasMageWeaponEquipped and currentRawMagerySkillValue > mageWeaponValue:
+            effectiveMageWeaponValue = mageWeaponValue
+            Player.EquipItem(weapon)
+            Misc.Pause(1000)
+        elif mageWeaponValue > 0 and currentRawMagerySkillValue <= mageWeaponValue:
+            # Unequip the mage weapon and re-equip it later (assuming it is equipped)
+            if Player.GetItemOnLayer('LeftHand') != None:
+                Player.UnEquipItemByLayer("LeftHand")
+                effectiveMageWeaponValue = 0 # Unequipped
+                Misc.Pause(1000)
+
+    currentSpell = getCurrentSpell(skillToRaise, effectiveMageWeaponValue) # TODO: ... is it really caring about scoping now?
     castSpell(skillToRaise, currentSpell)
    
     # Undress when low on mana
