@@ -2,7 +2,10 @@
 
 # If you're training Spellweaving, use at your own risk!! 
 # Word of Death can hurt. Discard your focus crystal prior to running and make sure you have Greater Heal!
-# If you're training... anything but Spellweaving, make sure your spell training gear gives you 100% LRC
+# If you're training anything but Spellweaving, make sure your spell training gear gives you 100% LRC
+# If you're training Chivalry, be sure to tithe 100 gold
+# If you're training Chivalry or Mysticism, it'll be helpful to have some skill in Magery to cast Harm and Greater Heal. If you don't, then you'll need to either train pre-45 manually or replace the harming/healing logic with what you do have available.
+# This also assumes that you have at least 60 max health. Use at your own risk if you don't...
 
 # TODO: Allow specification of a healing spell
 # TODO: Come up with a system where the user can specify which skills are to be trained – Can the script check if the skill is set to go up/down/locked, and only train those skills that are set up, and skip ones locked or set to go down?
@@ -37,9 +40,9 @@ currentSkillCap = Player.GetSkillCap(skillToRaise)
 magerySpellDict = {20: "Clumsy", 40: "Bless", 65: "Poison Field", 80: "Reveal", 87: "Mass Dispel", currentSkillCap: "Earthquake"}
 spellweavingSpellDict = {15: "Arcane Circle", 32: "Immolating Weapon", 52: "Reaper Form", 89: "Essence of Wind", 103: "Wildfire", currentSkillCap: "Word of Death"} # Key: Max Skill to cast
 necromancySpellDict = {40: "Curse Weapon", 50: "Pain Spike", 70: "Horrific Beast", 90: "Wither", currentSkillCap: "Lich Form"}
-chivalrySpellDict = {45: "Consecrate Weapon", 60: "Divine Fury", 70: "Enemy of One", currentSkillCap: "Holy Light"}
+chivalrySpellDict =  {15: "Close Wounds", 45: "Consecrate Weapon", 60: "Divine Fury", 70: "Enemy of One", currentSkillCap: "Holy Light"}
 bushidoSpellDict = {60: "Confidence", 77.5: "Counter Attack"} # Bushido is special in that the high-value skills need a hostile target.
-mysticismSpellDict = {62: "Stone Form", 83: "Cleansing Winds", currentSkillCap: "Nether Cyclone"}
+mysticismSpellDict =  {20: "Healing Stone", 40: "Eagle Strike", 62: "Stone Form", 83: "Cleansing Winds", currentSkillCap: "Nether Cyclone"}
 evalIntDict = {currentSkillCap: "Clumsy"}
 
 spellDict = {
@@ -130,14 +133,28 @@ def castSpell(currentSkill, spellName):
             Misc.Pause(4000) 
         Misc.Pause(4000)
     elif currentSkill == "Chivalry":
+        if currentSpell == "Close Wounds" and Player.Hits == Player.HitsMax:
+            Spells.CastMagery("Harm")
+            Target.WaitForTarget(10000, False)
+            Target.Self()
+            Misc.Pause(4000)
         Spells.CastChivalry(currentSpell)
+        if currentSpell in ["Close Wounds"]:
+            Target.WaitForTarget(10000, False)
+            Target.Self()
         Misc.Pause(4000)
     elif currentSkill == "Bushido":
         Spells.CastBushido(currentSpell)
         Misc.Pause(4000)
     elif currentSkill == "Mysticism":
         Spells.CastMysticism(currentSpell)
-        if currentSpell in ["Cleansing Winds", "Hail Storm", "Nether Cyclone"]:
+        if currentSpell == "Eagle Strike" and Player.Hits < 60:
+            while Player.Hits < 60:
+                Spells.Cast("Greater Heal")
+                Target.WaitForTarget(10000, False)
+                Target.Self()
+                Misc.Pause(1000)
+        if currentSpell in ["Eagle Strike", "Cleansing Winds", "Hail Storm", "Nether Cyclone"]:
             Target.WaitForTarget(10000, False)
             Target.Self()
         Misc.Pause(4000)
@@ -165,11 +182,11 @@ if dressList != "":
     getDressed()
 
 while (Player.GetSkillValue(skillToRaise) + mageWeaponValue) < currentSkillCap:
-    # Do Mage weapon calculations only if we're actually training magery
+    effectiveMageWeaponValue = mageWeaponValue # Whether or not mage weapon is in effect is, well, whether or not it is equipped.
+    
+    # Update Mage weapon calculations only if we're actually training magery
     if skillToRaise == "Magery":
-        currentRawMagerySkillValue = Player.GetSkillValue("Magery")
-        
-        effectiveMageWeaponValue = mageWeaponValue # Whether or not mage weapon is in effect is, well, whether or not it is equipped.
+        currentRawMagerySkillValue = Player.GetSkillValue("Magery")        
         # If a mage weapon was unequipped earlier, and our magery skill is high enough, equip it.
         if wasMageWeaponEquipped and currentRawMagerySkillValue > mageWeaponValue:
             effectiveMageWeaponValue = mageWeaponValue
