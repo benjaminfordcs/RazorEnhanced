@@ -32,7 +32,6 @@ maxManaCostDict = {
 # If we have a mage weapon, get the value so we can calculate the real skill value
 weapon = Player.GetItemOnLayer("LeftHand")
 mageWeaponValue = Items.GetPropValue(weapon, "Mage Weapon")
-wasMageWeaponEquipped = mageWeaponValue > 0 # Track whether or not a mage weapon was equipped at the start. May need to unequip...
 
 currentSkillCap = Player.GetSkillCap(skillToRaise)
 
@@ -55,14 +54,14 @@ spellDict = {
     "EvalInt": evalIntDict
 }
 
-def getCurrentSpell(currentSkill, effectiveMageWeaponValue):
+def getCurrentSpell(currentSkill):
     currentSkillValue=Player.GetSkillValue(currentSkill)
 
     # Note, if training magery, your "currentSkillValue" will be modified by any mage weapon in your hand.
     # But if your mage skill is lower than the mage weapon's value... you will fizzle a lot.
-    if currentSkill == "Magery" and effectiveMageWeaponValue > 0:
+    if currentSkill == "Magery" and mageWeaponValue > 0:
         # Add in any mage weapon penalty back in since that's what your real skill is
-        currentSkillValue += effectiveMageWeaponValue
+        currentSkillValue += mageWeaponValue
     
     stoppingPoint = currentSkillCap + 0.01
     lowestSkillBreakpointToCast = stoppingPoint
@@ -181,25 +180,8 @@ if dressList != "":
     Dress.ChangeList(dressList)
     getDressed()
 
-while (Player.GetSkillValue(skillToRaise) + mageWeaponValue) < currentSkillCap:
-    effectiveMageWeaponValue = mageWeaponValue # Whether or not mage weapon is in effect is, well, whether or not it is equipped.
-    
-    # Update Mage weapon calculations only if we're actually training magery
-    if skillToRaise == "Magery":
-        currentRawMagerySkillValue = Player.GetSkillValue("Magery")        
-        # If a mage weapon was unequipped earlier, and our magery skill is high enough, equip it.
-        if wasMageWeaponEquipped and currentRawMagerySkillValue > mageWeaponValue:
-            effectiveMageWeaponValue = mageWeaponValue
-            Player.EquipItem(weapon)
-            Misc.Pause(1000)
-        elif mageWeaponValue > 0 and currentRawMagerySkillValue <= mageWeaponValue:
-            # Unequip the mage weapon and re-equip it later (assuming it is equipped)
-            if Player.GetItemOnLayer('LeftHand') != None:
-                Player.UnEquipItemByLayer("LeftHand")
-                effectiveMageWeaponValue = 0 # Unequipped
-                Misc.Pause(1000)
-
-    currentSpell = getCurrentSpell(skillToRaise, effectiveMageWeaponValue) # TODO: ... is it really caring about scoping now?
+while Player.GetSkillValue(skillToRaise) < currentSkillCap:
+    currentSpell = getCurrentSpell(skillToRaise)
     castSpell(skillToRaise, currentSpell)
    
     # Undress when low on mana
