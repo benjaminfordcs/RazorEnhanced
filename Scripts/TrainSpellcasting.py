@@ -1,5 +1,7 @@
 # 4/19/24: Thanks to Q for filling out the necro spell dict, eval int, and some other suggestions! 
 
+# If you want to raise a spellcasting skill, make sure it is set to up!
+# SET ALL OTHER SPELLECASTING SKILLS that you aren't training TO DOWN OR LOCKED.
 # If you're training Spellweaving, use at your own risk!! 
 # Word of Death can hurt. Discard your focus crystal prior to running and make sure you have Greater Heal!
 # If you're training anything but Spellweaving, make sure your spell training gear gives you 100% LRC
@@ -16,9 +18,7 @@
 dressList = ""
 # dressList = "spell training"
 
-# skillsToRaise = ["Magery", "Necromancy", "Chivalry", "Bushido", "Mysticism", "EvalInt", "Spellweaving"]
-# TODO: Make this a list with applicable skills, then iterate. But figure out which skills of these the user wants to raise...
-skillToRaise = "Magery"
+skillsToRaise = ["Magery", "Necromancy", "Chivalry", "Bushido", "Mysticism", "EvalInt", "Spellweaving"]
 
 maxManaCostDict = {
     "Magery": 50,
@@ -33,16 +33,16 @@ maxManaCostDict = {
 weapon = Player.GetItemOnLayer("LeftHand")
 mageWeaponValue = Items.GetPropValue(weapon, "Mage Weapon")
 
-currentSkillCap = Player.GetSkillCap(skillToRaise)
+
 
 # TODO: Fill these out with the other spells from UOGuide
-magerySpellDict = {20: "Clumsy", 40: "Bless", 65: "Poison Field", 80: "Reveal", 87: "Mass Dispel", currentSkillCap: "Earthquake"}
-spellweavingSpellDict = {15: "Arcane Circle", 32: "Immolating Weapon", 52: "Reaper Form", 89: "Essence of Wind", 103: "Wildfire", currentSkillCap: "Word of Death"} # Key: Max Skill to cast
-necromancySpellDict = {40: "Curse Weapon", 50: "Pain Spike", 70: "Horrific Beast", 90: "Wither", currentSkillCap: "Lich Form"}
-chivalrySpellDict =  {15: "Close Wounds", 45: "Consecrate Weapon", 60: "Divine Fury", 70: "Enemy of One", currentSkillCap: "Holy Light"}
+magerySpellDict = {20: "Clumsy", 40: "Bless", 65: "Poison Field", 80: "Reveal", 87: "Mass Dispel", 120: "Earthquake"}
+spellweavingSpellDict = {15: "Arcane Circle", 32: "Immolating Weapon", 52: "Reaper Form", 89: "Essence of Wind", 103: "Wildfire", 120: "Word of Death"} # Key: Max Skill to cast
+necromancySpellDict = {40: "Curse Weapon", 50: "Pain Spike", 70: "Horrific Beast", 90: "Wither", 120: "Lich Form"}
+chivalrySpellDict =  {15: "Close Wounds", 45: "Consecrate Weapon", 60: "Divine Fury", 70: "Enemy of One", 120: "Holy Light"}
 bushidoSpellDict = {60: "Confidence", 77.5: "Counter Attack"} # Bushido is special in that the high-value skills need a hostile target.
-mysticismSpellDict =  {20: "Healing Stone", 40: "Eagle Strike", 62: "Stone Form", 83: "Cleansing Winds", currentSkillCap: "Nether Cyclone"}
-evalIntDict = {currentSkillCap: "Clumsy"}
+mysticismSpellDict =  {20: "Healing Stone", 40: "Eagle Strike", 62: "Stone Form", 83: "Cleansing Winds", 120: "Nether Cyclone"}
+evalIntDict = {120: "Clumsy"}
 
 spellDict = {
     "Magery": magerySpellDict,
@@ -180,26 +180,32 @@ if dressList != "":
     Dress.ChangeList(dressList)
     getDressed()
 
-while Player.GetSkillValue(skillToRaise) < currentSkillCap:
-    currentSpell = getCurrentSpell(skillToRaise)
-    castSpell(skillToRaise, currentSpell)
-   
-    # Undress when low on mana
-    if Player.Mana < maxManaCostDict[skillToRaise]:
-        Misc.SendMessage("Low on mana. Meditate.", False)
-        if dressList != "":
-            getUndressed()
-        Player.UseSkill("Meditation")
-        
-        while (Player.Mana / Player.ManaMax) < 1:
-            Misc.Pause(2000)
-        
-        # Dress when mana full
-        if dressList != "":
-            getDressed()
+for skillToRaise in skillsToRaise:
+    if Player.GetSkillStatus(skillToRaise) != 0:  # 0=up / 1=down / 2=locked 
+        continue
 
-# Before ending... make sure not in lich form. Or else.
-if Player.BuffsExist("Lich Form"):
-    while Player.BuffsExist("Lich Form"):
-        Spells.CastNecro("Lich Form")
-        Misc.Pause(4000)
+    currentSkillCap = Player.GetSkillCap(skillToRaise)
+
+    while Player.GetSkillValue(skillToRaise) < currentSkillCap:
+        currentSpell = getCurrentSpell(skillToRaise)
+        castSpell(skillToRaise, currentSpell)
+    
+        # Undress when low on mana
+        if Player.Mana < maxManaCostDict[skillToRaise]:
+            Misc.SendMessage("Low on mana. Meditate.", False)
+            if dressList != "":
+                getUndressed()
+            Player.UseSkill("Meditation")
+            
+            while (Player.Mana / Player.ManaMax) < 1:
+                Misc.Pause(2000)
+            
+            # Dress when mana full
+            if dressList != "":
+                getDressed()
+
+    # Before ending... make sure not in lich form. Or else.
+    if Player.BuffsExist("Lich Form"):
+        while Player.BuffsExist("Lich Form"):
+            Spells.CastNecro("Lich Form")
+            Misc.Pause(4000)
