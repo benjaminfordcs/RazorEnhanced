@@ -33,15 +33,12 @@ maxManaCostDict = {
 weapon = Player.GetItemOnLayer("LeftHand")
 mageWeaponValue = Items.GetPropValue(weapon, "Mage Weapon")
 
-
-
-# TODO: Fill these out with the other spells from UOGuide
-magerySpellDict = {20: "Clumsy", 40: "Bless", 65: "Poison Field", 80: "Reveal", 87: "Mass Dispel", 120: "Earthquake"}
-spellweavingSpellDict = {15: "Arcane Circle", 32: "Immolating Weapon", 52: "Reaper Form", 89: "Essence of Wind", 103: "Wildfire", 120: "Word of Death"} # Key: Max Skill to cast
-necromancySpellDict = {40: "Curse Weapon", 50: "Pain Spike", 70: "Horrific Beast", 90: "Wither", 120: "Lich Form"}
-chivalrySpellDict =  {15: "Close Wounds", 45: "Consecrate Weapon", 60: "Divine Fury", 70: "Enemy of One", 120: "Holy Light"}
-bushidoSpellDict = {60: "Confidence", 77.5: "Counter Attack"} # Bushido is special in that the high-value skills need a hostile target.
-mysticismSpellDict =  {20: "Healing Stone", 40: "Eagle Strike", 62: "Stone Form", 83: "Cleansing Winds", 120: "Nether Cyclone"}
+magerySpellDict = {20: "Clumsy", 40: "Bless", 65: "Poison Field", 80: "Reveal", 87: "Mass Dispel", Player.GetSkillCap("Magery"): "Earthquake"}
+spellweavingSpellDict = {15: "Arcane Circle", 32: "Immolating Weapon", 52: "Reaper Form", 89: "Essence of Wind", 103: "Wildfire", Player.GetSkillCap("Spellweaving"): "Word of Death"} # Key: Max Skill to cast
+necromancySpellDict = {40: "Curse Weapon", 50: "Pain Spike", 70: "Horrific Beast", 90: "Wither", Player.GetSkillCap("Necromancy"): "Lich Form"}
+chivalrySpellDict =  {15: "Close Wounds", 45: "Consecrate Weapon", 60: "Divine Fury", 70: "Enemy of One", Player.GetSkillCap("Chivalry"): "Holy Light"}
+bushidoSpellDict = {40: "Confidence", 60: "Counter Attack", 100: "Evasion"} # Bushido is special in that the high-value skills need a hostile target.
+mysticismSpellDict =  {20: "Healing Stone", 40: "Eagle Strike", 62: "Stone Form", 83: "Cleansing Winds", Player.GetSkillCap("Mysticism"): "Nether Cyclone"}
 evalIntDict = {120: "Clumsy"}
 
 spellDict = {
