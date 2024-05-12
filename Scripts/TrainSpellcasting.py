@@ -16,7 +16,7 @@
 # Recommended dress drag delay: 500 ms
 # If you specify an empty dress list "", this script won't undress or dress
 dressList = ""
-# dressList = "spell training"
+#dressList = "spell training"
 
 skillsToRaise = ["Magery", "Necromancy", "Chivalry", "Bushido", "Mysticism", "EvalInt", "Spellweaving"]
 
@@ -28,10 +28,6 @@ maxManaCostDict = {
     "Bushido": 10,
     "Mysticism": 50
 }
-
-# If we have a mage weapon, get the value so we can calculate the real skill value
-weapon = Player.GetItemOnLayer("LeftHand")
-mageWeaponValue = Items.GetPropValue(weapon, "Mage Weapon")
 
 magerySpellDict = {20: "Clumsy", 40: "Bless", 65: "Poison Field", 80: "Reveal", 87: "Mass Dispel", Player.GetSkillCap("Magery"): "Earthquake"}
 spellweavingSpellDict = {15: "Arcane Circle", 32: "Immolating Weapon", 52: "Reaper Form", 89: "Essence of Wind", 103: "Wildfire", Player.GetSkillCap("Spellweaving"): "Word of Death"} # Key: Max Skill to cast
@@ -51,14 +47,26 @@ spellDict = {
     "EvalInt": evalIntDict
 }
 
+def getCurrentRealMagerySkill():
+    # Note, if training magery, your skill value will be modified by any mage weapon in your hand.
+    # But if your mage skill is lower than the mage weapon's value... you will fizzle a lot.
+    # If we have a mage weapon, get the value so we can calculate the real skill value
+    weapon = Player.GetItemOnLayer("LeftHand")
+    mageWeaponValue = Items.GetPropValue(weapon, "Mage Weapon")
+    
+    currentMagerySkillValue=Player.GetSkillValue("Magery")
+    
+    if mageWeaponValue > 0:
+        # Add in any mage weapon penalty back in since that's what your real skill is
+        currentMagerySkillValue += mageWeaponValue
+    
+    return currentMagerySkillValue
+
 def getCurrentSpell(currentSkill):
     currentSkillValue=Player.GetSkillValue(currentSkill)
-
-    # Note, if training magery, your "currentSkillValue" will be modified by any mage weapon in your hand.
-    # But if your mage skill is lower than the mage weapon's value... you will fizzle a lot.
-    if currentSkill == "Magery" and mageWeaponValue > 0:
-        # Add in any mage weapon penalty back in since that's what your real skill is
-        currentSkillValue += mageWeaponValue
+    
+    if currentSkill == "Magery":
+        currentSkillValue = getCurrentRealMagerySkill()
     
     stoppingPoint = currentSkillCap + 0.01
     lowestSkillBreakpointToCast = stoppingPoint
@@ -72,8 +80,8 @@ def getCurrentSpell(currentSkill):
                 lowestSkillBreakpointToCast = skillBreakpoint
     
     if lowestSkillBreakpointToCast == stoppingPoint:
-        # TODO: Return something or allow iteration over other skills
-        raise Exception(f"All done raising {currentSkill}. Current skill value is: {currentSkillValue}")
+        # Don't return a spell if we're done training this skill.
+        return None
     else:
         return spellDict[currentSkill][lowestSkillBreakpointToCast]
 
@@ -180,11 +188,22 @@ if dressList != "":
 for skillToRaise in skillsToRaise:
     if Player.GetSkillStatus(skillToRaise) != 0:  # 0=up / 1=down / 2=locked 
         continue
+    
+    currentSkillCap = Player.GetSkillCap(skillToRaise)    
+    if skillToRaise == "Magery":
+        currentSkillValue = getCurrentRealMagerySkill()
+    else:        
+        currentSkillValue = Player.GetSkillValue(skillToRaise)
 
-    currentSkillCap = Player.GetSkillCap(skillToRaise)
-
-    while Player.GetSkillValue(skillToRaise) < currentSkillCap:
+    doneRaisingSkill = False
+    
+    while currentSkillValue < currentSkillCap and not doneRaisingSkill:
         currentSpell = getCurrentSpell(skillToRaise)
+        
+        if currentSpell is None:
+            Misc.SendMessage(f"All done raising {skillToRaise}.", False)
+            doneRaisingSkill = True
+            
         castSpell(skillToRaise, currentSpell)
     
         # Undress when low on mana
